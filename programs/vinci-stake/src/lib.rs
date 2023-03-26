@@ -1,5 +1,9 @@
+use mpl_token_metadata::utils::assert_derivation;
+
 use anchor_lang::prelude::*;
 use std::str::FromStr;
+use mpl_token_metadata::state::Metadata;
+use mpl_token_metadata::{self};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 //HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
@@ -25,7 +29,8 @@ pub mod vinci_stake {
 
         stake_entry.original_mint = ctx.accounts.original_mint.key();
         stake_entry.pool = stake_pool.key();
-        
+        stake_entry.amount = 0; //Probably not needed
+
         Ok(())
     }
 }

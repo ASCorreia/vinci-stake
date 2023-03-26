@@ -10,8 +10,10 @@ pub struct InitializeStakeEntry<'info> {
     #[account(mut)]
     pub stake_pool: Account<'info, StakePool>,
 
+    /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub original_mint: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub original_mint_metadata: AccountInfo<'info>,
 
