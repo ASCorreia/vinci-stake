@@ -44,7 +44,9 @@ pub mod vinci_stake {
             ],
         )?;
 
-        require!(ctx.accounts.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);       
+        require!(ctx.accounts.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);
+        let mint_metadata_mata = ctx.accounts.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
+        let original_mint_metada = Metadata::deserialize(&mut mint_metadata_mata.as_ref()).expect("Error deserializng metadata");      
 
         Ok(())
     }
