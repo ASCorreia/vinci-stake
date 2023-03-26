@@ -35,6 +35,7 @@ pub struct GroupStakeEntry {
 // ----- Next Steps ---- //
 /*
     1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account)
+        This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand)
     2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??))
     3 - See how it should update the stack details and the periodic time for that
  */
