@@ -11,7 +11,6 @@ pub struct InitializeStakePool<'info> {
 
 #[account]
 pub struct StakePool {
-    pub bump: u8,
     pub identifier: u64,
     pub authority: Pubkey,
     pub requires_creators: Vec<Pubkey>,

@@ -18,6 +18,16 @@ pub mod vinci_stake {
 
         Ok(())
     }
+
+    pub fn initialize_stake_entry(ctx: Context<InitializeStakeEntry>) -> Result<()> {
+        let stake_pool = &mut ctx.accounts.stake_pool;
+        let stake_entry = &mut ctx.accounts.stake_entry;
+
+        stake_entry.original_mint = ctx.accounts.original_mint.key();
+        stake_entry.pool = stake_pool.key();
+        
+        Ok(())
+    }
 }
 
 #[account]
