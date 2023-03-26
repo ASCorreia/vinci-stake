@@ -9,8 +9,10 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 //HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
 
 pub mod contexts;
+pub mod error;
 
 pub use contexts::*;
+pub use error::*;
 
 #[program]
 pub mod vinci_stake {
@@ -31,8 +33,22 @@ pub mod vinci_stake {
         stake_entry.pool = stake_pool.key();
         stake_entry.amount = 0; //Probably not needed
 
+        // assert metadata account derivation
+        assert_derivation(
+            &mpl_token_metadata::id(),
+            &ctx.accounts.original_mint_metadata.to_account_info(),
+            &[
+                mpl_token_metadata::state::PREFIX.as_bytes(),
+                mpl_token_metadata::id().as_ref(),
+                ctx.accounts.original_mint.key().as_ref(),
+            ],
+        )?;
+
+        require!(ctx.accounts.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);       
+
         Ok(())
     }
+    
 }
 
 #[account]
