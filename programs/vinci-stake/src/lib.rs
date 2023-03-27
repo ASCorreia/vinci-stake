@@ -46,12 +46,15 @@ pub mod vinci_stake {
 
         require!(ctx.accounts.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);
         let mint_metadata_mata = ctx.accounts.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
-        let original_mint_metada = Metadata::deserialize(&mut mint_metadata_mata.as_ref()).expect("Error deserializng metadata");      
+        let original_mint_metada = Metadata::deserialize(&mut mint_metadata_mata.as_ref()).expect("Error deserializng metadata");
+
+        /* Probably more checks need to be done in here */    
 
         Ok(())
     }
     
 }
+
 
 #[account]
 pub struct GroupStakeEntry {
@@ -71,5 +74,8 @@ pub struct GroupStakeEntry {
         This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand)
     2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??))
     3 - See how it should update the stack details and the periodic time for that
+
+    The stake entry shall be validated through creators, and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
+    Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)
  */
 
