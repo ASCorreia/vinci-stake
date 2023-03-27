@@ -45,10 +45,19 @@ pub mod vinci_stake {
         )?;
 
         require!(ctx.accounts.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);
-        let mint_metadata_mata = ctx.accounts.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
-        let original_mint_metada = Metadata::deserialize(&mut mint_metadata_mata.as_ref()).expect("Error deserializng metadata");
 
-        /* Probably more checks need to be done in here */    
+        /* Borrow and deserialize the metada account from the original mint metadata */
+        let mint_metadata_data = ctx.accounts.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
+        require!(ctx.accounts.original_mint_metadata.to_account_info().owner.key() == mpl_token_metadata::id(), CustomError::InvalidMintOwner); //Checks that the owner is the Metadadata program
+        let original_mint_metadata = Metadata::deserialize(&mut mint_metadata_data.as_ref()).expect("Error deserializng metadata");
+        require!(original_mint_metadata.mint == ctx.accounts.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored i nthe account are the same
+
+        //Get the creators from the metadata and see if the it contains the ones required by the stake pool
+        let creators = original_mint_metadata.data.creators.unwrap();
+        let find_creators = creators.iter().find(|creator| stake_pool.requires_creators.contains(&creator.address) && creator.verified);
+
+        //Checks that the creators have been found
+        require!(find_creators.is_some() == true, CustomError::MissingCreators);   
 
         Ok(())
     }

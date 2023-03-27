@@ -6,4 +6,10 @@ pub enum CustomError {
     MetadataAccountEmpty,
     #[msg("Invalid Mint Metadata")]
     InvalidMintMetadata,
+    #[msg("Invalid Mint")]
+    InvalidMint,
+    #[msg("Invalid Mint Owner")]
+    InvalidMintOwner,
+    #[msg("Missing Creators")]
+    MissingCreators,
 }
