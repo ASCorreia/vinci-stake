@@ -1,9 +1,11 @@
-use mpl_token_metadata::utils::assert_derivation;
-
 use anchor_lang::prelude::*;
 use std::str::FromStr;
+
+use mpl_token_metadata::utils::assert_derivation;
 use mpl_token_metadata::state::Metadata;
 use mpl_token_metadata::{self};
+
+use anchor_spl::token::{self};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 //HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
@@ -16,11 +18,18 @@ pub use error::*;
 
 #[program]
 pub mod vinci_stake {
+    use anchor_lang::solana_program::stake::state::Stake;
+
     use super::*;
 
     pub fn initialize_stake_pool(ctx: Context<InitializeStakePool>) -> Result<()> {
 
-        let _stake_pool = &mut ctx.accounts.stake_pool;
+        let stake_pool = &mut ctx.accounts.stake_pool;
+
+        stake_pool.double_or_reset_enabled = None;
+        stake_pool.cooldown_seconds = None;
+        stake_pool.identifier = 0xBEBACAFE;
+        stake_pool.requires_authorization = false;
 
         Ok(())
     }
@@ -58,6 +67,28 @@ pub mod vinci_stake {
 
         //Checks that the creators have been found
         require!(find_creators.is_some() == true, CustomError::MissingCreators);   
+
+        Ok(())
+    }
+
+    pub fn stake(ctx: Context<StakeCtx>) -> Result<()> {
+        let stake_pool = &mut ctx.accounts.stake_pool;
+        let stake_entry = &mut ctx.accounts.stake_entry;
+
+        //TBD Do checks to the stake accounts and add more custom errors
+
+        let from_token_account = &mut ctx.accounts.from_mint_token_account;
+        let to_token_account = &mut ctx.accounts.to_mint_token_account;
+
+        // Transfer NFT
+        let cpi_accounts = token::Transfer {
+            from: from_token_account.to_account_info(),
+            to: to_token_account.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_context, 1)?;
 
         Ok(())
     }
