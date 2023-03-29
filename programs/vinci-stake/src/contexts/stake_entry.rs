@@ -2,13 +2,10 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct InitializeStakeEntry<'info> {
-    #[account(mut)]
-    pub user: Signer<'info>,
-
-    #[account(init, seeds = [b"VinciWorldStakeEntry", user.key().as_ref(), stake_pool.key().as_ref()], bump, payer = user, space = 3500)]
+    #[account(init, seeds = [b"VinciWorldStakeEntry", user.key().as_ref()], bump, payer = user, space = 3500)] //stake_pool_account.key().as_ref()
     pub stake_entry: Account <'info, StakeEntry>,
     #[account(mut)]
-    pub stake_pool: Account<'info, StakePool>,
+    pub stake_pool_account: Account<'info, StakePool>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
@@ -16,6 +13,9 @@ pub struct InitializeStakeEntry<'info> {
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub original_mint_metadata: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub user: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }

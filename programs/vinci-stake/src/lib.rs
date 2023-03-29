@@ -30,12 +30,13 @@ pub mod vinci_stake {
         stake_pool.cooldown_seconds = None;
         stake_pool.identifier = 0xBEBACAFE;
         stake_pool.requires_authorization = false;
+        stake_pool.requires_creators.push(Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap());
 
         Ok(())
     }
 
     pub fn initialize_stake_entry(ctx: Context<InitializeStakeEntry>) -> Result<()> {
-        let stake_pool = &mut ctx.accounts.stake_pool;
+        let stake_pool = &mut ctx.accounts.stake_pool_account;
         let stake_entry = &mut ctx.accounts.stake_entry;
 
         stake_entry.original_mint = ctx.accounts.original_mint.key();
@@ -62,11 +63,11 @@ pub mod vinci_stake {
         require!(original_mint_metadata.mint == ctx.accounts.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored i nthe account are the same
 
         //Get the creators from the metadata and see if the it contains the ones required by the stake pool
-        let creators = original_mint_metadata.data.creators.unwrap();
-        let find_creators = creators.iter().find(|creator| stake_pool.requires_creators.contains(&creator.address) && creator.verified);
+        //let creators = original_mint_metadata.data.creators.unwrap();
+        //let find_creators = creators.iter().find(|creator| stake_pool.requires_creators.contains(&creator.address) && creator.verified);
 
         //Checks that the creators have been found
-        require!(find_creators.is_some() == true, CustomError::MissingCreators);   
+        //require!(find_creators.is_some() == true, CustomError::MissingCreators);   
 
         Ok(())
     }
