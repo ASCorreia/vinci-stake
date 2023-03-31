@@ -7,8 +7,9 @@ use mpl_token_metadata::{self};
 
 use anchor_spl::token::{self};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV");
 //HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
+//Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
 
 pub mod contexts;
 pub mod error;
@@ -29,7 +30,7 @@ pub mod vinci_stake {
         stake_pool.cooldown_seconds = None;
         stake_pool.identifier = 0xBEBACAFE;
         stake_pool.requires_authorization = false;
-        stake_pool.requires_creators.push(Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap());
+        stake_pool.requires_creators.push(Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap());
 
         Ok(())
     }
@@ -62,11 +63,11 @@ pub mod vinci_stake {
         require!(original_mint_metadata.mint == ctx.accounts.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored i nthe account are the same
 
         //Get the creators from the metadata and see if the it contains the ones required by the stake pool
-        //let creators = original_mint_metadata.data.creators.unwrap();
-        //let find_creators = creators.iter().find(|creator| stake_pool.requires_creators.contains(&creator.address) && creator.verified);
+        let creators = original_mint_metadata.data.creators.unwrap();
+        let find_creators = creators.iter().find(|creator| stake_pool.requires_creators.contains(&creator.address) && !creator.verified); // (!)creator.verified
 
         //Checks that the creators have been found
-        //require!(find_creators.is_some() == true, CustomError::MissingCreators);   
+        require!(find_creators.is_some() == true, CustomError::MissingCreators);   
 
         Ok(())
     }

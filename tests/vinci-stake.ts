@@ -46,7 +46,7 @@ describe("vinci-stake", () => {
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_3"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -65,7 +65,7 @@ describe("vinci-stake", () => {
 
     const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
-    
+
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
     const metaplex = new Metaplex(connection);
@@ -77,7 +77,7 @@ describe("vinci-stake", () => {
     
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_3"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId

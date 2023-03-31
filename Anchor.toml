@@ -1,14 +1,14 @@
 [features]
 seeds = false
 skip-lint = false
-[programs.localnet]
-vinci_stake = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+[programs.devnet]
+vinci_stake = "EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "/home/ascespool/.config/solana/id.json"
 
 [scripts]
