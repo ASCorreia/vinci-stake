@@ -18,7 +18,6 @@ pub use error::*;
 
 #[program]
 pub mod vinci_stake {
-    use anchor_lang::solana_program::stake::state::Stake;
 
     use super::*;
 

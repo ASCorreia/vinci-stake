@@ -2,6 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
 import { Metaplex, keypairIdentity, bundlrStorage } from "@metaplex-foundation/js";
+import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createInitializeMintInstruction} from "@solana/spl-token";
 
 import { Connection, clusterApiUrl } from "@solana/web3.js"; //used to test the metaplex findByMint function
 
@@ -28,6 +29,19 @@ describe("vinci-stake", () => {
       )
     )[0];
   };
+  const getMasterEdition = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
+    return (
+      await anchor.web3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("metadata"),
+          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+          mint.toBuffer(),
+          Buffer.from("edition"),
+        ],
+        TOKEN_METADATA_PROGRAM_ID
+      )
+    )[0];
+  };
 
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
@@ -47,14 +61,19 @@ describe("vinci-stake", () => {
     console.log("Staking Pool Initialized");
     console.log("Your transaction signature", tx);
 
+    /* -------------------------------------------------------------------------------- */
+
     const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
+    
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
     const metaplex = new Metaplex(connection);
     const nft = await metaplex.nfts().findByMint({ mintAddress });
     console.log("NFT found: ", nft);
     console.log("Metada Account: ", metadataAddress.toString());
+
+    /* --------------------------------------------------------------------------------- */
     
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
       [
