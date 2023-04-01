@@ -43,7 +43,7 @@ pub mod vinci_stake {
         stake_entry.pool = stake_pool.key();
         stake_entry.amount = 0; //Probably not needed
 
-        // assert metadata account derivation
+        // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
         assert_derivation(
             &mpl_token_metadata::id(),
             &ctx.accounts.original_mint_metadata.to_account_info(),
@@ -91,6 +91,16 @@ pub mod vinci_stake {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
+        //Set the last staked time
+        stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
+        
+        //Update the total staked time
+        stake_entry.total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(
+            (u128::try_from(Clock::get().unwrap().unix_timestamp)
+                .unwrap())
+                .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
+        );
+
         Ok(())
     }
     
@@ -111,12 +121,14 @@ pub struct GroupStakeEntry {
 
 // ----- Next Steps ---- //
 /*
-    1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account)
+    1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account) - Check
         This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand)
-    2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??))
-    3 - See how it should update the stack details and the periodic time for that
+    2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??)) - In progress
+    3 - See how it should update the stack details and the periodic time for that - In progress
 
     The stake entry shall be validated through creators, and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
     Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)
+
+    Note: Create the update stake time function
  */
 
