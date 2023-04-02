@@ -42,6 +42,9 @@ pub mod vinci_stake {
         stake_entry.original_mint = ctx.accounts.original_mint.key();
         stake_entry.pool = stake_pool.key();
         stake_entry.amount = 0; //Probably not needed
+        stake_entry.original_mint_claimed = false;
+        stake_entry.stake_mint_claimed = false;
+        stake_entry.original_owner = ctx.accounts.user.key();
 
         // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
         assert_derivation(
@@ -73,7 +76,6 @@ pub mod vinci_stake {
     }
 
     pub fn stake(ctx: Context<StakeCtx>) -> Result<()> {
-        let stake_pool = &mut ctx.accounts.stake_pool;
         let stake_entry = &mut ctx.accounts.stake_entry;
 
         //TBD Do checks to the stake accounts and add more custom errors
@@ -101,9 +103,37 @@ pub mod vinci_stake {
                 .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
         );
 
+        //Flag that the original mint has been claimed by the pool
+        stake_entry.original_mint_claimed = true;
+
         Ok(())
     }
-    
+
+    pub fn claim_stake(ctx: Context<StakeCtx>) -> Result<()> {
+        let stake_entry = &mut ctx.accounts.stake_entry;
+
+        let from_token_account = &mut ctx.accounts.from_mint_token_account;
+        let to_token_account = &mut ctx.accounts.to_mint_token_account;
+
+        require!(stake_entry.original_mint_claimed == true, CustomError::OriginalMintNotClaimed);
+        require!(stake_entry.stake_mint_claimed == false, CustomError::MintAlreadyClaimed);
+
+        //Transfer NFT
+        let cpi_accounts = token::Transfer{
+            from: from_token_account.to_account_info(),
+            to: to_token_account.to_account_info(),
+            authority: stake_entry.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_context, 1)?;
+
+        stake_entry.stake_mint_claimed = true;
+        stake_entry.original_mint_claimed = false;
+        stake_entry.total_stake_seconds = 0;
+
+        Ok(())
+    }    
 }
 
 
@@ -130,5 +160,8 @@ pub struct GroupStakeEntry {
     Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)
 
     Note: Create the update stake time function
+
+    Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the 
+        anchor init seeds)
  */
 

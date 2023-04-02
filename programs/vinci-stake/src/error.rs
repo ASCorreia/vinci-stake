@@ -12,4 +12,10 @@ pub enum CustomError {
     InvalidMintOwner,
     #[msg("Missing Creators")]
     MissingCreators,
+    #[msg("Invalid Stake Pool")]
+    InvalidStakePool,
+    #[msg("Original Mint Not Claimed")]
+    OriginalMintNotClaimed,
+    #[msg("Staked Mint Already Claimed")]
+    MintAlreadyClaimed
 }

@@ -46,20 +46,20 @@ describe("vinci-stake", () => {
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_3"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_4"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
       );
     // Add your test here.
-    const tx = await program.methods.initializeStakePool().accounts({
+    const stakePoolTx = await program.methods.initializeStakePool().accounts({
       stakePool: vinciWorldStake,
       user: key.wallet.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId,
     }).rpc();
     console.log("Staking Pool address: ", vinciWorldStake);
     console.log("Staking Pool Initialized");
-    console.log("Your transaction signature", tx);
+    console.log("Your transaction signature", stakePoolTx);
 
     /* -------------------------------------------------------------------------------- */
 
@@ -77,12 +77,12 @@ describe("vinci-stake", () => {
     
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_3"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_4"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
     )
-    const tx2 = await program.methods.initializeStakeEntry().accounts({
+    const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
       user: key.wallet.publicKey,
 
       stakeEntry: vinciWorldStakeEntry,
@@ -95,7 +95,7 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Stake Entry address: ", vinciWorldStake);
     console.log("Stake Entry created");
-    console.log("Your transaction signature", tx2);
+    console.log("Your transaction signature", stakeEntryTx);
     //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
     //Refer to https://github.com/metaplex-foundation/js#findByMint
 
