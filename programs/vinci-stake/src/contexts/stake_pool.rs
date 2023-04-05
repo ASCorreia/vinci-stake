@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct InitializeStakePool<'info> {
-    #[account(init, seeds = [b"VinciWorldStakePool_4", user.key().as_ref()], bump, payer = user, space = 3500)]
+    #[account(init, seeds = [b"VinciWorldStakePool_16", user.key().as_ref()], bump, payer = user, space = 3500)]
     pub stake_pool: Account <'info, StakePool>,
     #[account(mut)]
     pub user: Signer<'info>,

@@ -17,5 +17,7 @@ pub enum CustomError {
     #[msg("Original Mint Not Claimed")]
     OriginalMintNotClaimed,
     #[msg("Staked Mint Already Claimed")]
-    MintAlreadyClaimed
+    MintAlreadyClaimed,
+    #[msg("Unauthorized Signer")]
+    UnauthorizedSigner,
 }

@@ -19,7 +19,7 @@ pub use error::*;
 
 #[program]
 pub mod vinci_stake {
-
+    
     use super::*;
 
     pub fn initialize_stake_pool(ctx: Context<InitializeStakePool>) -> Result<()> {
@@ -93,6 +93,9 @@ pub mod vinci_stake {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
+        stake_entry.original_owner = from_token_account.key();
+        stake_entry.staking_owner = to_token_account.key();
+
         //Set the last staked time
         stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
         
@@ -110,20 +113,25 @@ pub mod vinci_stake {
     }
 
     pub fn claim_stake(ctx: Context<StakeCtx>) -> Result<()> {
+        let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
+
         let stake_entry = &mut ctx.accounts.stake_entry;
 
         let from_token_account = &mut ctx.accounts.from_mint_token_account;
         let to_token_account = &mut ctx.accounts.to_mint_token_account;
 
+        let signer = &mut ctx.accounts.user;
+
         require!(stake_entry.original_mint_claimed == true, CustomError::OriginalMintNotClaimed);
         require!(stake_entry.stake_mint_claimed == false, CustomError::MintAlreadyClaimed);
+        require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
         //Transfer NFT
         let cpi_accounts = token::Transfer{
             from: from_token_account.to_account_info(),
             to: to_token_account.to_account_info(),
-            authority: stake_entry.to_account_info(),
-        };
+            authority: signer.to_account_info(),
+        };       
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;

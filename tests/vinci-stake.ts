@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
-import { Metaplex, keypairIdentity, bundlrStorage } from "@metaplex-foundation/js";
+import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
 import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createInitializeMintInstruction} from "@solana/spl-token";
 
 import { Connection, clusterApiUrl } from "@solana/web3.js"; //used to test the metaplex findByMint function
@@ -29,24 +29,11 @@ describe("vinci-stake", () => {
       )
     )[0];
   };
-  const getMasterEdition = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
-    return (
-      await anchor.web3.PublicKey.findProgramAddress(
-        [
-          Buffer.from("metadata"),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mint.toBuffer(),
-          Buffer.from("edition"),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
-      )
-    )[0];
-  };
 
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_4"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_16"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -66,18 +53,35 @@ describe("vinci-stake", () => {
     const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
 
+    const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
     const metaplex = new Metaplex(connection);
     const nft = await metaplex.nfts().findByMint({ mintAddress });
+    const allNFTs = await metaplex.nfts().findAllByOwner({ owner: ownerAddress});
     console.log("NFT found: ", nft);
+    console.log("NFT json found: ", nft.json);
     console.log("Metada Account: ", metadataAddress.toString());
+    console.log("Nfts owned by the user: ", allNFTs);
 
     /* --------------------------------------------------------------------------------- */
-    
+    const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
+
+    //Fires a list of instructions
+    const mint_tx = new anchor.web3.Transaction().add(        
+      //Creates the ATA account that is associated with our mint on our anchor wallet (key)
+      createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, ownerAddress, mintAddress),
+      createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, key.wallet.publicKey, mintAddress)
+    );
+    const ataTx = key.sendAndConfirm(mint_tx);
+    console.log("Ata created: ", ataTx);
+    console.log("Ata address: ", associatedTokenAccountTo);
+
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_4"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_16"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -98,6 +102,19 @@ describe("vinci-stake", () => {
     console.log("Your transaction signature", stakeEntryTx);
     //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
     //Refer to https://github.com/metaplex-foundation/js#findByMint
+
+    const claimStakeTx = await program.methods.claimStake().accounts({
+      user: key.wallet.publicKey,
+
+      stakeEntry: vinciWorldStakeEntry,
+      stakePool: vinciWorldStake,
+
+      fromMintTokenAccount: associatedTokenAccountTo,
+      toMintTokenAccount: associatedTokenAccountFrom,
+
+      tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
+    console.log("Mint Claimed - Transaction ID: ", claimStakeTx);
 
   });
 });
