@@ -31,6 +31,7 @@ pub mod vinci_stake {
         stake_pool.identifier = 0xBEBACAFE;
         stake_pool.requires_authorization = false;
         stake_pool.requires_creators.push(Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap());
+        stake_pool.max_stake_amount = None;
 
         Ok(())
     }
@@ -171,5 +172,8 @@ pub struct GroupStakeEntry {
 
     Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the 
         anchor init seeds)
+
+    Try to use an array of original mint claimed, to be updated wih the original mint (so an user can have an unique stake entry with different tokens)
+    (consider both stake claimed and original mint claimed)
  */
 

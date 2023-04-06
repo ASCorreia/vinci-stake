@@ -33,7 +33,7 @@ describe("vinci-stake", () => {
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_16"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_19"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -81,7 +81,7 @@ describe("vinci-stake", () => {
 
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_16"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_19"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -116,5 +116,11 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);
 
+    const accounts = await connection.getProgramAccounts(program.programId);
+    console.log("\n\nProgram Owned Accounts:\n", accounts);
+
+    accounts.forEach((account, i) => {
+      console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
+    });
   });
 });

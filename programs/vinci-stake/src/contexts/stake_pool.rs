@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct InitializeStakePool<'info> {
-    #[account(init, seeds = [b"VinciWorldStakePool_16", user.key().as_ref()], bump, payer = user, space = 3500)]
+    #[account(init, seeds = [b"VinciWorldStakePool_19", user.key().as_ref()], bump, payer = user, space = 3500)]
     pub stake_pool: Account <'info, StakePool>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -24,4 +24,5 @@ pub struct StakePool {
     pub min_stake_seconds: Option<u32>,
     pub end_date: Option<i64>,
     pub double_or_reset_enabled: Option<bool>,
+    pub max_stake_amount: Option<u32>,
 }
