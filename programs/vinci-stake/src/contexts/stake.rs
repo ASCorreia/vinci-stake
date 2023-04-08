@@ -9,6 +9,10 @@ pub struct StakeCtx<'info>{
     #[account(mut)]
     pub stake_pool: Account<'info, StakePool>,
 
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
+    pub original_mint: AccountInfo<'info>,
+
     #[account(mut)]
     pub from_mint_token_account: Account<'info, TokenAccount>,
     #[account(mut)]

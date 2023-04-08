@@ -31,9 +31,9 @@ describe("vinci-stake", () => {
   };
 
   it("Is initialized!", async () => {
-    const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddress(
+    const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_19"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_27"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -50,10 +50,10 @@ describe("vinci-stake", () => {
 
     /* -------------------------------------------------------------------------------- */
 
-    const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
+    const mintAddress = new anchor.web3.PublicKey("8FhX1y3ZKYtKitketCUP1cGjrFjAFxuPqnsqE48EqA7R"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
 
-    const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+    const ownerAddress = new anchor.web3.PublicKey("7FeQ5jSCW71SYfxLtsEdmFSd45xFGiunRG7MZATdPoKu");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -79,9 +79,9 @@ describe("vinci-stake", () => {
     console.log("Ata created: ", ataTx);
     console.log("Ata address: ", associatedTokenAccountTo);
 
-    const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddress(
+    const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_19"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_27"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -112,15 +112,17 @@ describe("vinci-stake", () => {
       fromMintTokenAccount: associatedTokenAccountTo,
       toMintTokenAccount: associatedTokenAccountFrom,
 
+      originalMint: mintAddress,
+
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);
 
-    const accounts = await connection.getProgramAccounts(program.programId);
+   /*const accounts = await connection.getProgramAccounts(program.programId);
     console.log("\n\nProgram Owned Accounts:\n", accounts);
 
     accounts.forEach((account, i) => {
       console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
-    });
+    });*/
   });
 });

@@ -32,6 +32,7 @@ pub mod vinci_stake {
         stake_pool.requires_authorization = false;
         stake_pool.requires_creators.push(Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap());
         stake_pool.max_stake_amount = None;
+        stake_pool.total_staked = 0;
 
         Ok(())
     }
@@ -43,8 +44,9 @@ pub mod vinci_stake {
         stake_entry.original_mint = ctx.accounts.original_mint.key();
         stake_entry.pool = stake_pool.key();
         stake_entry.amount = 0; //Probably not needed
-        stake_entry.original_mint_claimed = false;
-        stake_entry.stake_mint_claimed = false;
+        stake_entry.original_mint_claimed = Vec::new();
+        stake_entry.stake_mint_claimed = Vec::new();
+        stake_entry.original_mint_seconds_struct = Vec::new();
         stake_entry.original_owner = ctx.accounts.user.key();
 
         // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
@@ -77,7 +79,10 @@ pub mod vinci_stake {
     }
 
     pub fn stake(ctx: Context<StakeCtx>) -> Result<()> {
+        let stake_pool = &mut ctx.accounts.stake_pool;
+
         let stake_entry = &mut ctx.accounts.stake_entry;
+        let original_mint = stake_entry.original_mint.key();
 
         //TBD Do checks to the stake accounts and add more custom errors
 
@@ -102,30 +107,40 @@ pub mod vinci_stake {
         
         //Update the total staked time
         stake_entry.total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(
-            (u128::try_from(Clock::get().unwrap().unix_timestamp)
-                .unwrap())
+            (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
                 .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
         );
 
         //Flag that the original mint has been claimed by the pool
-        stake_entry.original_mint_claimed = true;
+        stake_entry.original_mint_claimed.push(original_mint);
+
+        /* The following is an approach to store staking time if we decide to have multiple mints per entry */
+        let staking_time = StakeTime{time: stake_entry.total_stake_seconds, mint: original_mint};
+        stake_entry.original_mint_seconds_struct.push(staking_time);
+        /* ------------------------------------------------------------------------------------------------ */
+
+        stake_pool.total_staked += 1;
+
+        
 
         Ok(())
     }
 
     pub fn claim_stake(ctx: Context<StakeCtx>) -> Result<()> {
-        let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
+        //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
 
         let stake_entry = &mut ctx.accounts.stake_entry;
 
         let from_token_account = &mut ctx.accounts.from_mint_token_account;
         let to_token_account = &mut ctx.accounts.to_mint_token_account;
 
+        let original_mint = &mut ctx.accounts.original_mint;
+
         let signer = &mut ctx.accounts.user;
 
-        require!(stake_entry.original_mint_claimed == true, CustomError::OriginalMintNotClaimed);
-        require!(stake_entry.stake_mint_claimed == false, CustomError::MintAlreadyClaimed);
-        require!(signer.key() == authority, CustomError::UnauthorizedSigner);
+        //require!(stake_entry.original_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == Some(&original_mint.key()), CustomError::OriginalMintNotClaimed);
+        //require!(stake_entry.stake_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == None, CustomError::MintAlreadyClaimed);
+        //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
         //Transfer NFT
         let cpi_accounts = token::Transfer{
@@ -137,8 +152,11 @@ pub mod vinci_stake {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
-        stake_entry.stake_mint_claimed = true;
-        stake_entry.original_mint_claimed = false;
+        stake_entry.stake_mint_claimed.push(original_mint.key());
+        stake_entry.original_mint_claimed.retain(|mint| *mint != ctx.accounts.original_mint.key());
+        /* The following is an approach to store staking time if we decide to have multiple mints per entry */
+        //stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != ctx.accounts.original_mint.key());
+        /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
 
         Ok(())
