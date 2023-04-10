@@ -99,6 +99,8 @@ pub mod vinci_stake {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
+        //token::approve(ctx, amount) - For non custodial staking
+
         stake_entry.original_owner = from_token_account.key();
         stake_entry.staking_owner = to_token_account.key();
 
@@ -178,20 +180,22 @@ pub struct GroupStakeEntry {
 
 // ----- Next Steps ---- //
 /*
-    1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account) - Check
-        This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand)
-    2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??)) - In progress
-    3 - See how it should update the stack details and the periodic time for that - In progress
-
-    The stake entry shall be validated through creators, and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
-    Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)
-
-    Note: Create the update stake time function
+    1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account) - Done
+        This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand) - Done
+    2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??)) - The stake entry shall be validated through creators, 
+        and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
+        Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)In progress (Refer to 1. and 2.)
+    3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?)
+    4 - Create the update stake time function
 
     Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the 
         anchor init seeds)
 
-    Try to use an array of original mint claimed, to be updated wih the original mint (so an user can have an unique stake entry with different tokens)
-    (consider both stake claimed and original mint claimed)
+    1. Try to use an array of original mint claimed, to be updated wih the original mint (so an user can have an unique stake entry with different tokens)
+        (consider both stake claimed and original mint claimed)
+        Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
+    2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?)
+        Refer to token::approve and mpl_token_metadata::freeze_delegated_account
+
  */
 
