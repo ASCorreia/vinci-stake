@@ -128,6 +128,36 @@ pub mod vinci_stake {
         Ok(())
     }
 
+    pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
+        let stake_pool = &mut ctx.accounts.stake_pool;
+
+        let stake_entry = &mut ctx.accounts.stake_entry;
+        let original_mint = stake_entry.original_mint.key();
+
+        let user_token_accout = &mut ctx.accounts.from_mint_token_account;
+        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced by the program address
+        let authority = &mut ctx.accounts.user;
+
+        let cpi_accounts = token::Approve {
+            to: user_token_accout.to_account_info(),
+            delegate: delegate.to_account_info(),
+            authority: authority.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        token::approve(cpi_context, 1)?;
+
+        /*TBD:
+        refer to https://github.com/metaplex-foundation/metaplex-program-library/blob/7c4ceb0100364901f2317f3421aab0aac400b647/token-metadata/program/src/processor.rs#L1552-L1606
+        in order to freeze delegated account
+        */
+
+        stake_pool.total_staked += 1;
+        
+
+        Ok(())
+    }
+
     pub fn claim_stake(ctx: Context<StakeCtx>) -> Result<()> {
         //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
 
