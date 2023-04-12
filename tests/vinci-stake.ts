@@ -103,6 +103,20 @@ describe("vinci-stake", () => {
     //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
     //Refer to https://github.com/metaplex-foundation/js#findByMint
 
+    const stakeNFTtx = await program.methods.stake().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      stakePool: vinciWorldStake,
+
+      originalMint: mintAddress,
+      fromMintTokenAccount: associatedTokenAccountFrom,
+      toMintTokenAccount: associatedTokenAccountTo,
+
+      user: key.wallet.publicKey,
+
+      tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
+    console.log("NFT Stacked - Transaction ID", stakeNFTtx);
+
     const claimStakeTx = await program.methods.claimStake().accounts({
       user: key.wallet.publicKey,
 
