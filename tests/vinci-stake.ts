@@ -2,9 +2,10 @@ import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
-import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createInitializeMintInstruction} from "@solana/spl-token";
+import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount, createInitializeMintInstruction} from "@solana/spl-token";
 
-import { Connection, clusterApiUrl } from "@solana/web3.js"; //used to test the metaplex findByMint function
+import { Connection, clusterApiUrl} from "@solana/web3.js"; //used to test the metaplex findByMint function
+import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
@@ -33,7 +34,7 @@ describe("vinci-stake", () => {
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_27"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_28"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
@@ -50,10 +51,10 @@ describe("vinci-stake", () => {
 
     /* -------------------------------------------------------------------------------- */
 
-    const mintAddress = new anchor.web3.PublicKey("8FhX1y3ZKYtKitketCUP1cGjrFjAFxuPqnsqE48EqA7R"); //used for testing purposes only
+    const mintAddress = new anchor.web3.PublicKey("DH1E4sKgZx1vFed5VbG2A7ojwHy2R2VaAGA3ruMUMM4n"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
 
-    const ownerAddress = new anchor.web3.PublicKey("7FeQ5jSCW71SYfxLtsEdmFSd45xFGiunRG7MZATdPoKu");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+    const ownerAddress = new anchor.web3.PublicKey("EmyrJv7hebDdfeRQjMifgSinHK8ybp6L7UK7qLxwiDKe");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -69,19 +70,31 @@ describe("vinci-stake", () => {
     const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
     const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
 
-    //Fires a list of instructions
-    const mint_tx = new anchor.web3.Transaction().add(        
-      //Creates the ATA account that is associated with our mint on our anchor wallet (key)
-      createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, ownerAddress, mintAddress),
-      createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, key.wallet.publicKey, mintAddress)
-    );
-    const ataTx = key.sendAndConfirm(mint_tx);
-    console.log("Ata created: ", ataTx);
-    console.log("Ata address: ", associatedTokenAccountTo);
+    let receiverTokenAccount: any
+    try {
+      receiverTokenAccount = await getAccount(
+        connection,
+        associatedTokenAccountTo,
+        "confirmed",
+        TOKEN_PROGRAM_ID
+      )
+    } catch (e) {
+      // If the account does not exist, add the create account instruction to the transaction
+      //Fires a list of instructions
+      const mint_tx = new anchor.web3.Transaction().add(        
+        //Creates the ATA account that is associated with our mint on our anchor wallet (key)
+        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, key.wallet.publicKey, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+      );
+      console.log("Ata address: ", associatedTokenAccountTo.toString());
+      console.log("Ata address: ", associatedTokenAccountFrom.toString());
+      const ataTx = await key.sendAndConfirm(mint_tx);
+      console.log("Ata created: ", ataTx);
+    } 
+
 
     const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_27"),
+        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_28"),
         key.wallet.publicKey.toBuffer(),
       ],
       program.programId
