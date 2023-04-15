@@ -30,6 +30,19 @@ describe("vinci-stake", () => {
       )
     )[0];
   };
+  const getMasterEdition = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
+    return (
+      await anchor.web3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("metadata"),
+          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+          mint.toBuffer(),
+          Buffer.from("edition"),
+        ],
+        TOKEN_METADATA_PROGRAM_ID
+      )
+    )[0];
+  };
 
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddressSync(
@@ -40,21 +53,22 @@ describe("vinci-stake", () => {
       program.programId
       );
     // Add your test here.
-    const stakePoolTx = await program.methods.initializeStakePool().accounts({
+    /*const stakePoolTx = await program.methods.initializeStakePool().accounts({
       stakePool: vinciWorldStake,
       user: key.wallet.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId,
     }).rpc();
     console.log("Staking Pool address: ", vinciWorldStake);
     console.log("Staking Pool Initialized");
-    console.log("Your transaction signature", stakePoolTx);
+    console.log("Your transaction signature", stakePoolTx);*/
 
     /* -------------------------------------------------------------------------------- */
 
-    const mintAddress = new anchor.web3.PublicKey("DH1E4sKgZx1vFed5VbG2A7ojwHy2R2VaAGA3ruMUMM4n"); //used for testing purposes only
+    const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
+    const masterEditionAcc = await getMasterEdition(mintAddress);
 
-    const ownerAddress = new anchor.web3.PublicKey("EmyrJv7hebDdfeRQjMifgSinHK8ybp6L7UK7qLxwiDKe");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+    const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -74,7 +88,7 @@ describe("vinci-stake", () => {
     try {
       receiverTokenAccount = await getAccount(
         connection,
-        associatedTokenAccountTo,
+        associatedTokenAccountFrom,
         "confirmed",
         TOKEN_PROGRAM_ID
       )
@@ -83,7 +97,7 @@ describe("vinci-stake", () => {
       //Fires a list of instructions
       const mint_tx = new anchor.web3.Transaction().add(        
         //Creates the ATA account that is associated with our mint on our anchor wallet (key)
-        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, key.wallet.publicKey, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountFrom, ownerAddress, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
       );
       console.log("Ata address: ", associatedTokenAccountTo.toString());
       console.log("Ata address: ", associatedTokenAccountFrom.toString());
@@ -99,7 +113,7 @@ describe("vinci-stake", () => {
       ],
       program.programId
     )
-    const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
+    /*const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
       user: key.wallet.publicKey,
 
       stakeEntry: vinciWorldStakeEntry,
@@ -112,11 +126,11 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Stake Entry address: ", vinciWorldStake);
     console.log("Stake Entry created");
-    console.log("Your transaction signature", stakeEntryTx);
+    console.log("Your transaction signature", stakeEntryTx);*/
     //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
     //Refer to https://github.com/metaplex-foundation/js#findByMint
 
-    const stakeNFTtx = await program.methods.stake().accounts({
+    /*const stakeNFTtx = await program.methods.stake().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
 
@@ -128,7 +142,7 @@ describe("vinci-stake", () => {
 
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    console.log("NFT Stacked - Transaction ID", stakeNFTtx);
+    console.log("NFT Stacked - Transaction ID", stakeNFTtx);*/
 
     const claimStakeTx = await program.methods.claimStake().accounts({
       user: key.wallet.publicKey,
@@ -141,9 +155,31 @@ describe("vinci-stake", () => {
 
       originalMint: mintAddress,
 
+      masterEdition: masterEditionAcc,
+
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);
+
+    // Convert private key string to a Uint8Array
+    //const privateKey = Buffer.from('privatekey', 'hex');
+    // Create a Solana keypair from the private key bytes
+    //const keypair = anchor.web3.Keypair.fromSecretKey(privateKey);
+    //const keypair2 = anchor.web3.Keypair.fromSeed(privateKey);
+    //console.log('Public key:', keypair2.publicKey.toString());
+    //console.log('Private key:', keypair2.secretKey.toString());
+
+    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      stakePool: vinciWorldStake,
+      originalMint: mintAddress,
+      fromMintTokenAccount: associatedTokenAccountTo, //associatedTokenAccountFrom
+      toMintTokenAccount: program.programId,
+      user: key.wallet.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      masterEdition: masterEditionAcc, 
+    });
+    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
 
    /*const accounts = await connection.getProgramAccounts(program.programId);
     console.log("\n\nProgram Owned Accounts:\n", accounts);

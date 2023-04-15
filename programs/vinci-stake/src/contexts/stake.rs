@@ -13,6 +13,10 @@ pub struct StakeCtx<'info>{
     #[account(mut)]
     pub original_mint: AccountInfo<'info>,
 
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
+    pub master_edition: UncheckedAccount<'info>,
+
     #[account(mut)]
     pub from_mint_token_account: Account<'info, TokenAccount>,
     #[account(mut)]

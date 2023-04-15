@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use mpl_token_metadata::utils::assert_derivation;
 use mpl_token_metadata::state::Metadata;
+use mpl_token_metadata::instruction::freeze_delegated_account;
 use mpl_token_metadata::{self};
 
 use anchor_spl::token::{self};
@@ -19,7 +20,9 @@ pub use error::*;
 
 #[program]
 pub mod vinci_stake {
-    
+
+    use anchor_lang::solana_program::program::{invoke, invoke_signed};
+
     use super::*;
 
     pub fn initialize_stake_pool(ctx: Context<InitializeStakePool>) -> Result<()> {
@@ -130,12 +133,16 @@ pub mod vinci_stake {
 
     pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
         let stake_pool = &mut ctx.accounts.stake_pool;
-
         let stake_entry = &mut ctx.accounts.stake_entry;
-        let original_mint = stake_entry.original_mint.key();
+
+        let original_mint = &mut ctx.accounts.original_mint;
 
         let user_token_accout = &mut ctx.accounts.from_mint_token_account;
-        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced by the program address
+        let program_id = &mut ctx.accounts.token_program;
+
+        let token_edition = &mut ctx.accounts.master_edition.to_account_info();
+
+        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
         let authority = &mut ctx.accounts.user;
 
         let cpi_accounts = token::Approve {
@@ -143,17 +150,51 @@ pub mod vinci_stake {
             delegate: delegate.to_account_info(),
             authority: authority.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_program = program_id.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::approve(cpi_context, 1)?;
+
+        // Define the seeds
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[&"PDA_WORD".as_bytes()], &program_id.key());
+
+        // Calculate the program-derived address (PDA) and bump seed
+        let seeds = &["PDA_WORD".as_bytes(), &[pda_bump]];
+
+        invoke(
+            &freeze_delegated_account(
+                program_id.key(),
+                delegate.key(),
+                user_token_accout.key(),
+                token_edition.key(),
+                original_mint.key(),
+            ),
+            &[
+                delegate.to_account_info(),
+                user_token_accout.to_account_info(),
+                token_edition.to_account_info(),
+                original_mint.to_account_info(),
+            ],
+        )?;
 
         /*TBD:
         refer to https://github.com/metaplex-foundation/metaplex-program-library/blob/7c4ceb0100364901f2317f3421aab0aac400b647/token-metadata/program/src/processor.rs#L1552-L1606
         in order to freeze delegated account
+
+        Either use invoke_signed or try to use the program itself as delegation authority
         */
+        stake_entry.original_owner = user_token_accout.key();
+        stake_entry.staking_owner = delegate.key();
+
+        //Set the last staked time
+        stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
+        
+        //Update the total staked time
+        stake_entry.total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(
+            (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
+                .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
+        );
 
         stake_pool.total_staked += 1;
-        
 
         Ok(())
     }
