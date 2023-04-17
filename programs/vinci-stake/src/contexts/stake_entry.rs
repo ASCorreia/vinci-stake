@@ -3,7 +3,7 @@ use crate::{*, program::VinciStake};
 #[derive(Accounts)]
 pub struct InitializeStakeEntry<'info> {
     #[account(init, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump, payer = user, space = 3500)] //stake_pool_account.key().as_ref()
-    pub stake_entry: Account <'info, StakeEntry>,
+    pub stake_entry: Account<'info, StakeEntry>,
     #[account(mut)]
     pub stake_pool_account: Account<'info, StakePool>,
 
