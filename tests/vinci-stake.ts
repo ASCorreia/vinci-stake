@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import * as bs58 from "bs58";
 import { Program } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
@@ -6,6 +7,7 @@ import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, ge
 
 import { Connection, clusterApiUrl} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
+import base58 from "bs58";
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
@@ -69,6 +71,12 @@ describe("vinci-stake", () => {
     const masterEditionAcc = await getMasterEdition(mintAddress);
 
     const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+
+    // Convert private key string to a Uint8Array
+    const b = bs58.decode('4CX8mXBDM522qF8xfMe6NcpRpL6wavYqNoUqvQnd21ZBDNpcBWoEAdwDiRAp8Q7nRkvPPFFjjeZdmMeHduScUHb3');
+    const j = new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
+    const keypair = anchor.web3.Keypair.fromSecretKey(j);
+    console.log("Public Key: ", keypair.publicKey.toString(), "\n Private Key: ", keypair.secretKey.toString());
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -144,7 +152,7 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("NFT Stacked - Transaction ID", stakeNFTtx);*/
 
-    const claimStakeTx = await program.methods.claimStake().accounts({
+    /*const claimStakeTx = await program.methods.claimStake().accounts({
       user: key.wallet.publicKey,
 
       stakeEntry: vinciWorldStakeEntry,
@@ -159,26 +167,18 @@ describe("vinci-stake", () => {
 
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    console.log("Mint Claimed - Transaction ID: ", claimStakeTx);
-
-    // Convert private key string to a Uint8Array
-    //const privateKey = Buffer.from('privatekey', 'hex');
-    // Create a Solana keypair from the private key bytes
-    //const keypair = anchor.web3.Keypair.fromSecretKey(privateKey);
-    //const keypair2 = anchor.web3.Keypair.fromSeed(privateKey);
-    //console.log('Public key:', keypair2.publicKey.toString());
-    //console.log('Private key:', keypair2.secretKey.toString());
+    console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
 
     const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
-      fromMintTokenAccount: associatedTokenAccountTo, //associatedTokenAccountFrom
+      fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
       toMintTokenAccount: program.programId,
-      user: key.wallet.publicKey,
+      user: keypair.publicKey, //key.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc, 
-    });
+    }).signers([keypair]);
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
 
    /*const accounts = await connection.getProgramAccounts(program.programId);

@@ -102,8 +102,6 @@ pub mod vinci_stake {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
-        //token::approve(ctx, amount) - For non custodial staking
-
         stake_entry.original_owner = from_token_account.key();
         stake_entry.staking_owner = to_token_account.key();
 
@@ -146,7 +144,7 @@ pub mod vinci_stake {
         let authority = &mut ctx.accounts.user;
 
         let cpi_accounts = token::Approve {
-            to: user_token_accout.to_account_info(),
+            to: user_token_accout.to_account_info(),//original_mint.to_account_info(),
             delegate: delegate.to_account_info(),
             authority: authority.to_account_info(),
         };
@@ -160,7 +158,7 @@ pub mod vinci_stake {
         // Calculate the program-derived address (PDA) and bump seed
         let seeds = &["PDA_WORD".as_bytes(), &[pda_bump]];
 
-        invoke(
+        invoke_signed(
             &freeze_delegated_account(
                 program_id.key(),
                 delegate.key(),
@@ -174,6 +172,9 @@ pub mod vinci_stake {
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
+            &[&[
+                program_id.key().as_ref(),
+            ]]
         )?;
 
         /*TBD:
