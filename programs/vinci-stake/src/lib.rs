@@ -1,4 +1,6 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::program::{invoke, invoke_signed};
+
 use std::str::FromStr;
 
 use mpl_token_metadata::utils::assert_derivation;
@@ -20,8 +22,6 @@ pub use error::*;
 
 #[program]
 pub mod vinci_stake {
-
-    use anchor_lang::solana_program::program::{invoke, invoke_signed};
 
     use super::*;
 
@@ -158,7 +158,7 @@ pub mod vinci_stake {
         // Calculate the program-derived address (PDA) and bump seed
         let seeds = &["PDA_WORD".as_bytes(), &[pda_bump]];
 
-        invoke_signed(
+        invoke(
             &freeze_delegated_account(
                 program_id.key(),
                 delegate.key(),
@@ -172,9 +172,6 @@ pub mod vinci_stake {
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[&[
-                program_id.key().as_ref(),
-            ]]
         )?;
 
         /*TBD:
@@ -182,6 +179,7 @@ pub mod vinci_stake {
         in order to freeze delegated account
 
         Either use invoke_signed or try to use the program itself as delegation authority
+        Try creating a PDA with a predefined seed (PDA_WORD for instance) and sign with that account (Create a dedicated PDA for this purpose))
         */
         stake_entry.original_owner = user_token_accout.key();
         stake_entry.staking_owner = delegate.key();

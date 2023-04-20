@@ -1,4 +1,4 @@
-use crate::{*, program::VinciStake};
+use crate::*;
 
 #[derive(Accounts)]
 pub struct InitializeStakeEntry<'info> {

@@ -1,18 +1,36 @@
 import * as anchor from "@project-serum/anchor";
 import * as bs58 from "bs58";
-import { Program } from "@project-serum/anchor";
+import { Program, AnchorProvider } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
 import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount, createInitializeMintInstruction} from "@solana/spl-token";
 
-import { Connection, clusterApiUrl} from "@solana/web3.js"; //used to test the metaplex findByMint function
+import { Connection, clusterApiUrl, ConfirmOptions} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import base58 from "bs58";
+import { Wallet } from "@project-serum/anchor";
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
   const key = anchor.AnchorProvider.env()
   anchor.setProvider(key);
+
+  // Convert private key string to a Uint8Array
+  const b = bs58.decode('privatekey');
+  const j = new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
+  const keypair = anchor.web3.Keypair.fromSecretKey(j);
+  console.log("Public Key: ", keypair.publicKey.toString(), "\n Private Key: ", keypair.secretKey.toString());
+
+  /*const network = clusterApiUrl("devnet");
+  const opts: ConfirmOptions = {
+    preflightCommitment: 'processed' //processed
+  }
+
+  const connection2 = new Connection(network, 'processed');
+
+  const wallet = new Wallet(keypair);    
+  const provider = new AnchorProvider(connection2, wallet, opts);
+  anchor.setProvider(provider);*/
 
   const program = anchor.workspace.VinciStake as Program<VinciStake>;
 
@@ -71,12 +89,6 @@ describe("vinci-stake", () => {
     const masterEditionAcc = await getMasterEdition(mintAddress);
 
     const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
-
-    // Convert private key string to a Uint8Array
-    const b = bs58.decode('4CX8mXBDM522qF8xfMe6NcpRpL6wavYqNoUqvQnd21ZBDNpcBWoEAdwDiRAp8Q7nRkvPPFFjjeZdmMeHduScUHb3');
-    const j = new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
-    const keypair = anchor.web3.Keypair.fromSecretKey(j);
-    console.log("Public Key: ", keypair.publicKey.toString(), "\n Private Key: ", keypair.secretKey.toString());
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -178,7 +190,7 @@ describe("vinci-stake", () => {
       user: keypair.publicKey, //key.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc, 
-    }).signers([keypair]);
+    }).signers([keypair]).rpc();
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
 
    /*const accounts = await connection.getProgramAccounts(program.programId);

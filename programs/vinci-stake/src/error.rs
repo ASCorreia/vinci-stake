@@ -20,4 +20,5 @@ pub enum CustomError {
     MintAlreadyClaimed,
     #[msg("Unauthorized Signer")]
     UnauthorizedSigner,
+
 }
