@@ -26,4 +26,8 @@ pub struct StakeCtx<'info>{
     pub user: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
+
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
+    pub test: AccountInfo<'info>,
 }

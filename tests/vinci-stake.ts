@@ -181,15 +181,23 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
 
+    const [vinciWorldNonCustodial, bumpNonCustodial] = await anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("PDA_WORD"),
+      ],
+      program.programId
+    )
+
     const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
       fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
-      toMintTokenAccount: program.programId,
+      toMintTokenAccount: vinciWorldStakeEntry, //vinciWorldNonCustodial, //program.programId,
       user: keypair.publicKey, //key.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
-      masterEdition: masterEditionAcc, 
+      masterEdition: masterEditionAcc,
+      test: key.wallet.publicKey,
     }).signers([keypair]).rpc();
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
 
