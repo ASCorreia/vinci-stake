@@ -147,35 +147,34 @@ pub mod vinci_stake {
 
         let cpi_accounts = token::Approve {
             to: user_token_accout.to_account_info(),//original_mint.to_account_info(),
-            delegate: pda.to_account_info(),//delegate.to_account_info(),
+            delegate: delegate.to_account_info(),//delegate.to_account_info(),
             authority: authority.to_account_info(),
         };
         let cpi_program = program_id.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
-        token::approve(cpi_context, 1)?;
+        token::approve(cpi_context, 5)?;
 
         // Define the seeds
-        let (_pda_address, pda_bump) = Pubkey::find_program_address(&[&"VinciWorldStakeEntry_28".as_bytes()], &pda.key());
+        let (_pda_address, pda_bump) = Pubkey::find_program_address(&["PDA_WORDDD".as_bytes()], &id());
 
         // Calculate the program-derived address (PDA) and bump seed
-        let seeds = &["PDA_WORD".as_bytes(), &[pda_bump]];
-        let seeds = [&["VinciWorldStakeEntry_28".as_bytes()], &[pda.key().as_ref()]];
+        let seeds = &["PDA_WORDDD".as_bytes(), &[pda_bump]];
 
         invoke_signed(
             &freeze_delegated_account(
                 program_id.key(),
-                pda.key(),//delegate.key(),
+                delegate.key(),
                 user_token_accout.key(),
                 token_edition.key(),
                 original_mint.key(),
             ),
             &[
-                pda.to_account_info(),//delegate.to_account_info(),
+                delegate.to_account_info(),//pda.to_account_info(),
                 user_token_accout.to_account_info(),
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[&["VinciWorldStakeEntry_28".as_bytes()], &[pda.key().as_ref()]],
+            &[seeds],//&[&[&"PDA_WORDD".as_bytes()]],
         )?;
 
         /*TBD:

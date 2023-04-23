@@ -183,17 +183,39 @@ describe("vinci-stake", () => {
 
     const [vinciWorldNonCustodial, bumpNonCustodial] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("PDA_WORD"),
+        anchor.utils.bytes.utf8.encode("PDA_WORDDD"),
       ],
       program.programId
     )
+
+    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldNonCustodial, true);
+
+    let receiverTokenAccount2: any
+    try {
+      receiverTokenAccount2 = await getAccount(
+        connection,
+        associatedTokenAccountNonCust,
+        "confirmed",
+        TOKEN_PROGRAM_ID
+      )
+    } catch (e) {
+      // If the account does not exist, add the create account instruction to the transaction
+      //Fires a list of instructions
+      const mint_tx = new anchor.web3.Transaction().add(        
+        //Creates the ATA account that is associated with our mint on our anchor wallet (key)
+        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountNonCust, vinciWorldNonCustodial, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+      );
+      console.log("Ata address: ", associatedTokenAccountNonCust.toString());
+      const ataTx = await key.sendAndConfirm(mint_tx);
+      console.log("Ata created: ", ataTx);
+    } 
 
     const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
       fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
-      toMintTokenAccount: vinciWorldStakeEntry, //vinciWorldNonCustodial, //program.programId,
+      toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
       user: keypair.publicKey, //key.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
