@@ -72,6 +72,7 @@ describe("vinci-stake", () => {
       ],
       program.programId
       );
+    console.log("Vinci World Staking Pool account: ", vinciWorldStake);
     // Add your test here.
     /*const stakePoolTx = await program.methods.initializeStakePool().accounts({
       stakePool: vinciWorldStake,
@@ -133,6 +134,7 @@ describe("vinci-stake", () => {
       ],
       program.programId
     )
+    console.log("Vinci Worls Stake Entry account: ", vinciWorldStakeEntry);
     /*const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
       user: key.wallet.publicKey,
 
@@ -183,7 +185,7 @@ describe("vinci-stake", () => {
 
     const [vinciWorldNonCustodial, bumpNonCustodial] = await anchor.web3.PublicKey.findProgramAddressSync(
       [
-        anchor.utils.bytes.utf8.encode("PDA_WORDDD"),
+        anchor.utils.bytes.utf8.encode("PDA_WORDDDD"),
       ],
       program.programId
     )
@@ -210,6 +212,32 @@ describe("vinci-stake", () => {
       console.log("Ata created: ", ataTx);
     } 
 
+    console.log("stakeEntry:", vinciWorldStakeEntry.toString());
+    console.log("stakePool:", vinciWorldStake.toString());
+    console.log("originalMint:", mintAddress.toString());
+    console.log("fromMintTokenAccount:", associatedTokenAccountFrom.toString());
+    console.log("toMintTokenAccount:", associatedTokenAccountNonCust.toString());
+    console.log("user:", keypair.publicKey.toString());
+    console.log("tokenProgram:", TOKEN_PROGRAM_ID.toString());
+    console.log("masterEdition:", masterEditionAcc.toString());
+    console.log("test:", key.wallet.publicKey.toString());
+
+    const signers = [keypair];
+    const txInstruction = program.methods.stakeNonCustodial().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      stakePool: vinciWorldStake,
+      originalMint: mintAddress,
+      fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
+      toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
+      user: keypair.publicKey, //key.wallet.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      masterEdition: masterEditionAcc,
+      test: key.wallet.publicKey,
+    });
+
+    console.log("Method Builder: ", await txInstruction.instruction());
+    console.log("Signers:", JSON.stringify(signers, null, 2));
+
     const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
@@ -222,6 +250,8 @@ describe("vinci-stake", () => {
       test: key.wallet.publicKey,
     }).signers([keypair]).rpc();
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
+
+    //TBD: Check the vinciWorldNonCustodial account details (ownership, etc) on SolScan
 
    /*const accounts = await connection.getProgramAccounts(program.programId);
     console.log("\n\nProgram Owned Accounts:\n", accounts);

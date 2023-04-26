@@ -130,7 +130,7 @@ pub mod vinci_stake {
     }
 
     pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
-        let pda = &mut ctx.accounts.test;
+        //let pda = &mut ctx.accounts.test;
         
         let stake_pool = &mut ctx.accounts.stake_pool;
         let stake_entry = &mut ctx.accounts.stake_entry;
@@ -145,6 +145,15 @@ pub mod vinci_stake {
         let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
         let authority = &mut ctx.accounts.user;
 
+        msg!("stake_pool: {:?}", stake_pool.to_account_info().key);
+        msg!("stake_entry: {:?}", stake_entry.to_account_info().key);
+        msg!("original_mint: {:?}", original_mint.key);
+        msg!("user_token_account: {:?}", user_token_accout.to_account_info().key);
+        msg!("delegate: {:?}", delegate.to_account_info().key);
+        msg!("authority: {:?}", authority.key);
+        msg!("token_program: {:?}", program_id.to_account_info().key);
+        msg!("master_edition: {:?}", token_edition.key);
+        
         let cpi_accounts = token::Approve {
             to: user_token_accout.to_account_info(),//original_mint.to_account_info(),
             delegate: delegate.to_account_info(),//delegate.to_account_info(),
@@ -152,13 +161,15 @@ pub mod vinci_stake {
         };
         let cpi_program = program_id.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
-        token::approve(cpi_context, 5)?;
+
+        token::approve(cpi_context, 1)?;
 
         // Define the seeds
-        let (_pda_address, pda_bump) = Pubkey::find_program_address(&["PDA_WORDDD".as_bytes()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&["PDA_WORDDDD".as_bytes()], &id());
+        msg!("Derived PDA Address: {}", pda_address);
 
         // Calculate the program-derived address (PDA) and bump seed
-        let seeds = &["PDA_WORDDD".as_bytes(), &[pda_bump]];
+        let seeds = &["PDA_WORDDDD".as_bytes(), &[pda_bump]];
 
         invoke_signed(
             &freeze_delegated_account(
