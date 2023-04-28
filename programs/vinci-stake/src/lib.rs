@@ -130,8 +130,8 @@ pub mod vinci_stake {
     }
 
     pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
-        //let pda = &mut ctx.accounts.test;
-        
+        let pda = &mut ctx.accounts.test;
+        msg!("wooohoooooooooo");
         let stake_pool = &mut ctx.accounts.stake_pool;
         let stake_entry = &mut ctx.accounts.stake_entry;
 
@@ -140,7 +140,7 @@ pub mod vinci_stake {
         let user_token_accout = &mut ctx.accounts.from_mint_token_account;
         let program_id = &mut ctx.accounts.token_program;
 
-        let token_edition = &mut ctx.accounts.master_edition.to_account_info();
+        let token_edition = &mut ctx.accounts.master_edition;
 
         let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
         let authority = &mut ctx.accounts.user;
@@ -152,11 +152,11 @@ pub mod vinci_stake {
         msg!("delegate: {:?}", delegate.to_account_info().key);
         msg!("authority: {:?}", authority.key);
         msg!("token_program: {:?}", program_id.to_account_info().key);
-        msg!("master_edition: {:?}", token_edition.key);
+        msg!("master_edition: {:?}", token_edition.to_account_info().key);
         
         let cpi_accounts = token::Approve {
-            to: user_token_accout.to_account_info(),//original_mint.to_account_info(),
-            delegate: delegate.to_account_info(),//delegate.to_account_info(),
+            to: user_token_accout.to_account_info(),//original_mint.to_account_info(),user_token_accout
+            delegate: stake_entry.to_account_info(),//delegate.to_account_info(),
             authority: authority.to_account_info(),
         };
         let cpi_program = program_id.to_account_info();
@@ -165,27 +165,36 @@ pub mod vinci_stake {
         token::approve(cpi_context, 1)?;
 
         // Define the seeds
-        let (pda_address, pda_bump) = Pubkey::find_program_address(&["PDA_WORDDDD".as_bytes()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", pda.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
+        msg!("Derived PDA Bump: {}", pda_bump);
 
         // Calculate the program-derived address (PDA) and bump seed
-        let seeds = &["PDA_WORDDDD".as_bytes(), &[pda_bump]];
+        let seeds = &["PDA_CENAS".as_bytes(), &[pda_bump]];
+
+        let seeds = &[
+            "VinciWorldStakeEntry_28".as_bytes(),
+            &pda.key().clone().to_bytes(),
+            &[pda_bump]
+        ];
+
+        let signer_seeds = &[&seeds[..]];
 
         invoke_signed(
             &freeze_delegated_account(
                 program_id.key(),
-                delegate.key(),
+                stake_entry.key(),
                 user_token_accout.key(),
                 token_edition.key(),
                 original_mint.key(),
             ),
             &[
-                delegate.to_account_info(),//pda.to_account_info(),
+                stake_entry.to_account_info(),//pda.to_account_info(),
                 user_token_accout.to_account_info(),
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[seeds],//&[&[&"PDA_WORDD".as_bytes()]],
+            &[seeds],//&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
         )?;
 
         /*TBD:
