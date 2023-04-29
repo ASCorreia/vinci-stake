@@ -228,6 +228,7 @@ describe("vinci-stake", () => {
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
       test: key.wallet.publicKey,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
     }).signers([keypair]).rpc(
       {
         skipPreflight: true,

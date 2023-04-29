@@ -145,6 +145,8 @@ pub mod vinci_stake {
         let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
         let authority = &mut ctx.accounts.user;
 
+        let program_metadata_id = &mut ctx.accounts.token_metadata_program;
+
         msg!("stake_pool: {:?}", stake_pool.to_account_info().key);
         msg!("stake_entry: {:?}", stake_entry.to_account_info().key);
         msg!("original_mint: {:?}", original_mint.key);
@@ -170,7 +172,7 @@ pub mod vinci_stake {
         msg!("Derived PDA Bump: {}", pda_bump);
 
         // Calculate the program-derived address (PDA) and bump seed
-        let seeds = &["PDA_CENAS".as_bytes(), &[pda_bump]];
+        //let seeds = &["PDA_CENAS".as_bytes(), &[pda_bump]];
 
         let seeds = &[
             "VinciWorldStakeEntry_28".as_bytes(),
@@ -178,11 +180,11 @@ pub mod vinci_stake {
             &[pda_bump]
         ];
 
-        let signer_seeds = &[&seeds[..]];
+        //let signer_seeds = &[&seeds[..]];
 
         invoke_signed(
             &freeze_delegated_account(
-                program_id.key(),
+                program_metadata_id.key(),
                 stake_entry.key(),
                 user_token_accout.key(),
                 token_edition.key(),
