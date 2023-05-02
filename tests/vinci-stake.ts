@@ -218,7 +218,7 @@ describe("vinci-stake", () => {
 
     console.log('The token account info is:', tokenAccountData);
 
-    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
+    /*const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
@@ -234,7 +234,25 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
+    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
+
+    const claimNonCust = await program.methods.claimNonCustodial().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      stakePool: vinciWorldStake,
+      originalMint: mintAddress,
+      fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
+      toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
+      user: key.wallet.publicKey, //key.wallet.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      masterEdition: masterEditionAcc,
+      test: key.wallet.publicKey,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+    }).rpc(
+      {
+        skipPreflight: true,
+      }
+    );
+    console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
 
     //TBD: Check the vinciWorldNonCustodial account details (ownership, etc) on SolScan
 

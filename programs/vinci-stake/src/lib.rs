@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use mpl_token_metadata::utils::assert_derivation;
 use mpl_token_metadata::state::Metadata;
-use mpl_token_metadata::instruction::freeze_delegated_account;
+use mpl_token_metadata::instruction::{freeze_delegated_account, thaw_delegated_account};
 use mpl_token_metadata::{self};
 
 use anchor_spl::token::{self};
@@ -142,7 +142,6 @@ pub mod vinci_stake {
 
         let token_edition = &mut ctx.accounts.master_edition;
 
-        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
         let authority = &mut ctx.accounts.user;
 
         let program_metadata_id = &mut ctx.accounts.token_metadata_program;
@@ -151,14 +150,14 @@ pub mod vinci_stake {
         msg!("stake_entry: {:?}", stake_entry.to_account_info().key);
         msg!("original_mint: {:?}", original_mint.key);
         msg!("user_token_account: {:?}", user_token_accout.to_account_info().key);
-        msg!("delegate: {:?}", delegate.to_account_info().key);
+        //msg!("delegate: {:?}", delegate.to_account_info().key);
         msg!("authority: {:?}", authority.key);
         msg!("token_program: {:?}", program_id.to_account_info().key);
         msg!("master_edition: {:?}", token_edition.to_account_info().key);
         
         let cpi_accounts = token::Approve {
-            to: user_token_accout.to_account_info(),//original_mint.to_account_info(),user_token_accout
-            delegate: stake_entry.to_account_info(),//delegate.to_account_info(),
+            to: user_token_accout.to_account_info(),
+            delegate: stake_entry.to_account_info(),
             authority: authority.to_account_info(),
         };
         let cpi_program = program_id.to_account_info();
@@ -180,8 +179,6 @@ pub mod vinci_stake {
             &[pda_bump]
         ];
 
-        //let signer_seeds = &[&seeds[..]];
-
         invoke_signed(
             &freeze_delegated_account(
                 program_metadata_id.key(),
@@ -191,23 +188,20 @@ pub mod vinci_stake {
                 original_mint.key(),
             ),
             &[
-                stake_entry.to_account_info(),//pda.to_account_info(),
+                stake_entry.to_account_info(),
                 user_token_accout.to_account_info(),
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[seeds],//&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
+            &[seeds], //&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
         )?;
 
         /*TBD:
-        refer to https://github.com/metaplex-foundation/metaplex-program-library/blob/7c4ceb0100364901f2317f3421aab0aac400b647/token-metadata/program/src/processor.rs#L1552-L1606
-        in order to freeze delegated account
-
         Either use invoke_signed or try to use the program itself as delegation authority
         Try creating a PDA with a predefined seed (PDA_WORD for instance) and sign with that account (Create a dedicated PDA for this purpose))
         */
         stake_entry.original_owner = user_token_accout.key();
-        stake_entry.staking_owner = delegate.key();
+        stake_entry.staking_owner = stake_entry.key();
 
         //Set the last staked time
         stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
@@ -218,6 +212,14 @@ pub mod vinci_stake {
                 .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
         );
 
+        //Flag that the original mint has been claimed by the pool
+        stake_entry.original_mint_claimed.push(original_mint.key());
+
+        /* The following is an approach to store staking time if we decide to have multiple mints per entry */
+        let staking_time = StakeTime{time: stake_entry.total_stake_seconds, mint: original_mint.key()};
+        stake_entry.original_mint_seconds_struct.push(staking_time);
+        /* ------------------------------------------------------------------------------------------------ */
+
         stake_pool.total_staked += 1;
 
         Ok(())
@@ -226,6 +228,7 @@ pub mod vinci_stake {
     pub fn claim_stake(ctx: Context<StakeCtx>) -> Result<()> {
         //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
 
+        let stake_pool = &mut ctx.accounts.stake_pool;
         let stake_entry = &mut ctx.accounts.stake_entry;
 
         let from_token_account = &mut ctx.accounts.from_mint_token_account;
@@ -252,9 +255,76 @@ pub mod vinci_stake {
         stake_entry.stake_mint_claimed.push(original_mint.key());
         stake_entry.original_mint_claimed.retain(|mint| *mint != ctx.accounts.original_mint.key());
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
-        //stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != ctx.accounts.original_mint.key());
+        stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != ctx.accounts.original_mint.key());
         /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
+
+        //stake_pool.total_staked -= 1;
+
+
+        Ok(())
+    }
+
+    pub fn claim_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
+        //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
+        let pda = &mut ctx.accounts.test;
+
+        let stake_pool = &mut ctx.accounts.stake_pool;
+        let stake_entry = &mut ctx.accounts.stake_entry;
+
+        let original_mint = &mut ctx.accounts.original_mint;
+
+        let user_token_accout = &mut ctx.accounts.from_mint_token_account;
+        let program_id = &mut ctx.accounts.token_program;
+
+        let token_edition = &mut ctx.accounts.master_edition;
+
+        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
+        let signer = &mut ctx.accounts.user;
+
+        let program_metadata_id = &mut ctx.accounts.token_metadata_program;
+
+        require!(stake_entry.pool == stake_pool.key(), CustomError::InvalidStakePool);
+        //require!(stake_entry.original_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == Some(&original_mint.key()), CustomError::OriginalMintNotClaimed);
+        //require!(stake_entry.stake_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == None, CustomError::MintAlreadyClaimed);
+        //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
+
+        // Define the seeds
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", pda.key().as_ref()], &id());
+        msg!("Derived PDA Address: {}", pda_address);
+        msg!("Derived PDA Bump: {}", pda_bump);
+
+        let seeds = &[
+            "VinciWorldStakeEntry_28".as_bytes(),
+            &pda.key().clone().to_bytes(),
+            &[pda_bump]
+        ];
+
+        invoke_signed(
+            &thaw_delegated_account(
+                program_metadata_id.key(),
+                stake_entry.key(),
+                user_token_accout.key(),
+                token_edition.key(),
+                original_mint.key(),
+            ),
+            &[
+                stake_entry.to_account_info(),//pda.to_account_info(),
+                user_token_accout.to_account_info(),
+                token_edition.to_account_info(),
+                original_mint.to_account_info(),
+            ],
+            &[seeds], //&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
+        )?;
+
+        stake_entry.stake_mint_claimed.push(original_mint.key());
+        stake_entry.original_mint_claimed.retain(|mint| *mint != ctx.accounts.original_mint.key());
+        /* The following is an approach to store staking time if we decide to have multiple mints per entry */
+        stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != ctx.accounts.original_mint.key());
+        /* ------------------------------------------------------------------------------------------------ */
+        stake_entry.total_stake_seconds = 0;
+
+        //stake_pool.total_staked -= 1;
 
         Ok(())
     }    
@@ -288,9 +358,8 @@ pub struct GroupStakeEntry {
 
     1. Try to use an array of original mint claimed, to be updated wih the original mint (so an user can have an unique stake entry with different tokens)
         (consider both stake claimed and original mint claimed)
-        Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
-    2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?)
-        Refer to token::approve and mpl_token_metadata::freeze_delegated_account
+        Note: Find a way, if possible, for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
+    2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) Currently done with two different functions
 
  */
 
