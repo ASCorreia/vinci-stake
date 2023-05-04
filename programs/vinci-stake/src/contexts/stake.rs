@@ -34,3 +34,8 @@ pub struct StakeCtx<'info>{
     /// CHECK: This is not dangerous because we don't read or write from this account
     pub token_metadata_program: UncheckedAccount<'info>,
 }
+
+#[derive(Accounts)]
+pub struct UpdateStakeCtx<'info>{
+    pub stake_pool: Signer<'info>,
+}

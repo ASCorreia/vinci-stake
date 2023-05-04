@@ -327,7 +327,38 @@ pub mod vinci_stake {
         //stake_pool.total_staked -= 1;
 
         Ok(())
-    }    
+    }
+
+    pub fn update_stake(ctx: Context<UpdateStakeCtx>) -> Result<()> {
+        //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
+        //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
+
+        //Iterate through all the remaining accounts array
+        for account in ctx.remaining_accounts.iter() {
+            let mut stake_entry_data = account.try_borrow_mut_data()?;
+
+            //Deserialize the data into a stake entry
+            let mut stake_entry = StakeEntry::try_deserialize(&mut stake_entry_data.as_ref()).expect("Error deserializing stake entry data");
+
+            //Update the stake time 
+            for index in 0..stake_entry.original_mint_seconds_struct.len() {
+                let total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(
+                    (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
+                        .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
+                );
+
+                stake_entry.original_mint_seconds_struct[index].time = total_stake_seconds;
+            }
+
+            //Set the last staked time
+            stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
+
+            //Serialize the data back
+            stake_entry.try_serialize(&mut stake_entry_data.as_mut())?;
+        }
+
+        Ok(())
+    }
 }
 
 
@@ -350,7 +381,7 @@ pub struct GroupStakeEntry {
     2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??)) - The stake entry shall be validated through creators, 
         and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
         Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)In progress (Refer to 1. and 2.)
-    3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?)
+    3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?) - Consider using epochs (client will ask for update once per day)
     4 - Create the update stake time function
 
     Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the 
@@ -360,6 +391,8 @@ pub struct GroupStakeEntry {
         (consider both stake claimed and original mint claimed)
         Note: Find a way, if possible, for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
     2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) Currently done with two different functions
+
+    Context for updating stake entrys is created. use remaining_accounts to deal with it
 
  */
 

@@ -7,18 +7,14 @@ import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, ge
 
 import { Connection, clusterApiUrl, ConfirmOptions} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
-import base58 from "bs58";
 import { Wallet } from "@project-serum/anchor";
+import { keypair } from "../wallet";
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
   const key = anchor.AnchorProvider.env()
   anchor.setProvider(key);
 
-  // Convert private key string to a Uint8Array
-  const b = bs58.decode('privatekey');
-  const j = new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
-  const keypair = anchor.web3.Keypair.fromSecretKey(j);
   console.log("Public Key: ", keypair.publicKey.toString(), "\n Private Key: ", keypair.secretKey.toString());
 
   /*const network = clusterApiUrl("devnet");
@@ -40,7 +36,7 @@ describe("vinci-stake", () => {
   const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
   const getMetadata = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
     return (
-      await anchor.web3.PublicKey.findProgramAddress(
+      anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from("metadata"),
           TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -52,7 +48,7 @@ describe("vinci-stake", () => {
   };
   const getMasterEdition = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
     return (
-      await anchor.web3.PublicKey.findProgramAddress(
+      anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from("metadata"),
           TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -65,7 +61,7 @@ describe("vinci-stake", () => {
   };
 
   it("Is initialized!", async () => {
-    const [vinciWorldStake, _] = await anchor.web3.PublicKey.findProgramAddressSync(
+    const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("VinciWorldStakePool_28"),
         key.wallet.publicKey.toBuffer(),
@@ -127,7 +123,7 @@ describe("vinci-stake", () => {
     } 
 
 
-    const [vinciWorldStakeEntry, bump] = await anchor.web3.PublicKey.findProgramAddressSync(
+    const [vinciWorldStakeEntry, bump] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_28"),
         key.wallet.publicKey.toBuffer(),
