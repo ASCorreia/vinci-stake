@@ -392,7 +392,11 @@ pub struct GroupStakeEntry {
         Note: Find a way, if possible, for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
     2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) Currently done with two different functions
 
-    Context for updating stake entrys is created. use remaining_accounts to deal with it
+    Context for updating stake entrys is created. use remaining_accounts to deal with it -> Done! To be tested!
+
+    Create context for rewards distribution (to discuss with project members how to do this.. e.g what to give, when, etc)
+    Consider using a new program for rewards (that way it can be upgradable without interfering with the stake program). That program will receive Stake entries, check the signer and will
+    distribute rewards.
 
  */
 

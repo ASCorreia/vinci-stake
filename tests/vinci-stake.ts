@@ -180,7 +180,7 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
 
-    const [vinciWorldNonCustodial, bumpNonCustodial] = await anchor.web3.PublicKey.findProgramAddressSync(
+    const [vinciWorldNonCustodial, bumpNonCustodial] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("PDA_CENAS"),
       ],
@@ -249,8 +249,6 @@ describe("vinci-stake", () => {
       }
     );
     console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
-
-    //TBD: Check the vinciWorldNonCustodial account details (ownership, etc) on SolScan
 
    /*const accounts = await connection.getProgramAccounts(program.programId);
     console.log("\n\nProgram Owned Accounts:\n", accounts);
