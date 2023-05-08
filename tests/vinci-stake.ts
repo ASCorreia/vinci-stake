@@ -1,5 +1,4 @@
 import * as anchor from "@project-serum/anchor";
-import * as bs58 from "bs58";
 import { Program, AnchorProvider } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
@@ -7,7 +6,6 @@ import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, ge
 
 import { Connection, clusterApiUrl, ConfirmOptions} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
-import { Wallet } from "@project-serum/anchor";
 import { keypair } from "../wallet";
 
 describe("vinci-stake", () => {

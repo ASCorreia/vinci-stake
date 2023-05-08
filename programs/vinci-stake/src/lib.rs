@@ -398,5 +398,7 @@ pub struct GroupStakeEntry {
     Consider using a new program for rewards (that way it can be upgradable without interfering with the stake program). That program will receive Stake entries, check the signer and will
     distribute rewards.
 
+    Vinci stake will interact (cpi) with vinci rewards.. Vinci rewards will then interact with vinci world main contract to update accounts
+
  */
 
