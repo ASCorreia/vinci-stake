@@ -372,31 +372,22 @@ pub mod vinci_stake {
     }
 }
 
-// ----- Next Steps ---- //
+// ----- Next Steps ----- //
 /*
     1 - Create Stake entry in the pool according to NFT creators (use Metaplex Metadata account to retrieve the creators and make sure they are verified and match the expected account) - Done
         This will need to receive the Token address and the metadata account address (as the program needs to know every account to read / write beforehand) - Done
     2 - If it matches, transfer the NFT to our stake pool (To see the best way to store the user as previous owner (ATA, pubkey??)) - The stake entry shall be validated through creators, 
-        and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token).
+        and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token). - Done
         Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)In progress (Refer to 1. and 2.)
     3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?) - Consider using epochs (client will ask for update once per day)
-    4 - Create the update stake time function
+        Currently there is a Context for updating stake entrys (total stacked time) to be tested!
 
-    Note: Find a way for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the 
-        anchor init seeds)
+    Note: Find a way for a user to be able to stake more than 1 NFT in the same pool - Currently done with multiple NFTs per stake entry. 
+        Perhaps dig deeper into PDAs and seeds to find another solution (like a user having multiple PDAs? Is it worth it?)?
+    
+    4. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) - Currently done with two different functions
 
-    1. Try to use an array of original mint claimed, to be updated wih the original mint (so an user can have an unique stake entry with different tokens)
-        (consider both stake claimed and original mint claimed)
-        Note: Find a way, if possible, for a user to be able to stake more than 1 NFT in the same pool (how to create different PDAs (stake entry) for the same user in the same pool (try look at the anchor init seeds)
-    2. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) Currently done with two different functions
-
-    Context for updating stake entrys is created. use remaining_accounts to deal with it -> Done! To be tested!
-
-    Create context for rewards distribution (to discuss with project members how to do this.. e.g what to give, when, etc)
-    Consider using a new program for rewards (that way it can be upgradable without interfering with the stake program). That program will receive Stake entries, check the signer and will
-    distribute rewards.
-
-    Vinci stake will interact (cpi) with vinci rewards.. Vinci rewards will then interact with vinci world main contract to update accounts
+    Vinci stake will interact (cpi) with vinci rewards - Done
 
  */
 
