@@ -10,6 +10,8 @@ use mpl_token_metadata::{self};
 
 use anchor_spl::token::{self};
 
+use vinci_rewards::program::VinciRewards;
+
 declare_id!("EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV");
 //HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
 //Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
@@ -169,9 +171,6 @@ pub mod vinci_stake {
         let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", pda.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
         msg!("Derived PDA Bump: {}", pda_bump);
-
-        // Calculate the program-derived address (PDA) and bump seed
-        //let seeds = &["PDA_CENAS".as_bytes(), &[pda_bump]];
 
         let seeds = &[
             "VinciWorldStakeEntry_28".as_bytes(),
@@ -359,19 +358,18 @@ pub mod vinci_stake {
 
         Ok(())
     }
-}
 
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
 
-#[account]
-pub struct GroupStakeEntry {
-    pub bump: u8,
-    pub group_id: Pubkey,
-    pub authority: Pubkey,
-    pub stake_entries: Vec<Pubkey>,
-    pub changed_at: i64,
-    pub group_cooldown_seconds: u32,
-    pub group_stake_seconds: u32,
-    pub group_cooldown_start_seconds: Option<i64>,
+        let cpi_program = ctx.accounts.rewards_program.to_account_info();
+        let cpi_accounts = vinci_rewards::cpi::accounts::Initialize {
+            account: ctx.accounts.stake_entry.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        vinci_rewards::cpi::initialize(cpi_ctx)?;
+
+        Ok(())
+    }
 }
 
 // ----- Next Steps ---- //

@@ -7,6 +7,7 @@ import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, ge
 import { Connection, clusterApiUrl, ConfirmOptions} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { keypair } from "../wallet";
+import { VinciRewards } from "../target/types/vinci_rewards";
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
@@ -27,6 +28,7 @@ describe("vinci-stake", () => {
   anchor.setProvider(provider);*/
 
   const program = anchor.workspace.VinciStake as Program<VinciStake>;
+  const rewardsProgram = anchor.workspace.VinciRewards as Program<VinciRewards>;
 
   console.log("\nProvider public key", key.wallet.publicKey.toString());
 
@@ -230,7 +232,15 @@ describe("vinci-stake", () => {
     );
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
 
-    const claimNonCust = await program.methods.claimNonCustodial().accounts({
+    const claimRewards = await program.methods.claimRewards().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      rewardsProgram: rewardsProgram.programId,
+    }).rpc({
+      skipPreflight: true,
+    });
+    console.log('Rewards sucesfully claimed - Transaction ID: ', claimRewards);
+
+    /*const claimNonCust = await program.methods.claimNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
@@ -246,7 +256,7 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
+    console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);*/
 
    /*const accounts = await connection.getProgramAccounts(program.programId);
     console.log("\n\nProgram Owned Accounts:\n", accounts);

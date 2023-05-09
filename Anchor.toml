@@ -3,6 +3,7 @@ seeds = false
 skip-lint = false
 [programs.devnet]
 vinci_stake = "EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV"
+vinci_rewards = "4DszCYyUCeXYX3qRQoTdWscvXUyMkGmAm7KMrgLYX4FF"
 
 [registry]
 url = "https://api.apr.dev"

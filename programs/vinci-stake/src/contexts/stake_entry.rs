@@ -3,9 +3,9 @@ use crate::*;
 #[derive(Accounts)]
 pub struct InitializeStakeEntry<'info> {
     #[account(init, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump, payer = user, space = 3500)] //stake_pool_account.key().as_ref()
-    pub stake_entry: Account<'info, StakeEntry>,
+    pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
-    pub stake_pool_account: Account<'info, StakePool>,
+    pub stake_pool_account: Box<Account<'info, StakePool>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
@@ -18,6 +18,14 @@ pub struct InitializeStakeEntry<'info> {
     pub user: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct ClaimRewards<'info> {
+    #[account(mut)]
+    pub stake_entry: Account<'info, StakeEntry>,
+
+    pub rewards_program: Program<'info, VinciRewards>,
 }
 
 #[account]
