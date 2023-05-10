@@ -22,3 +22,9 @@ pub mod vinci_rewards {
         Ok(())
     }
 }
+
+// ----- Next Steps ----- //
+/*
+    1. Vinci rewards will interact with vinci world main contract to update accounts - Amount of tokens, etc.
+    2. Mint NFT function should be moved to rewards program?
+ */

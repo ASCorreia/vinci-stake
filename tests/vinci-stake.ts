@@ -232,12 +232,17 @@ describe("vinci-stake", () => {
     );
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
 
+    const updateEntry = await program.methods.updateStake().accounts({
+      stakePool: key.publicKey,
+    }).remainingAccounts([
+      {pubkey: vinciWorldStakeEntry, isSigner: false, isWritable: true}   
+    ]).rpc();
+    console.log('Stake Entry Successfully updated - Transaction ID: ', updateEntry);
+
     const claimRewards = await program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
       rewardsProgram: rewardsProgram.programId,
-    }).rpc({
-      skipPreflight: true,
-    });
+    }).rpc();
     console.log('Rewards sucesfully claimed - Transaction ID: ', claimRewards);
 
     /*const claimNonCust = await program.methods.claimNonCustodial().accounts({
@@ -264,5 +269,6 @@ describe("vinci-stake", () => {
     accounts.forEach((account, i) => {
       console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
     });*/
+
   });
 });
