@@ -59,7 +59,7 @@ pub mod vinci_accounts {
         
         //Security check to be used when the frontend / backend is updated 
         //require!(ctx.accounts.payer.is_signer == true && ctx.accounts.payer.to_account_info().key() == account_to_claim.owner, CustomError::WrongSigner);
-
+    
         require!(account_to_claim.total_amount != 0, CustomError::InsufficientBalanceSpl);
         let cpi_accounts = MintTo {
             mint: ctx.accounts.mint.to_account_info(),
