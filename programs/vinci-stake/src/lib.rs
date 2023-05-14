@@ -133,7 +133,6 @@ pub mod vinci_stake {
 
     pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
         let pda = &mut ctx.accounts.test;
-        msg!("wooohoooooooooo");
         let stake_pool = &mut ctx.accounts.stake_pool;
         let stake_entry = &mut ctx.accounts.stake_entry;
 
@@ -380,7 +379,7 @@ pub mod vinci_stake {
         and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token). - Done
         Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)In progress (Refer to 1. and 2.)
     3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?) - Consider using epochs (client will ask for update once per day)
-        Currently there is a Context for updating stake entrys (total stacked time) to be tested!
+        Note: Currently there is a Context and method for updating stake entrys already tested!
 
     Note: Find a way for a user to be able to stake more than 1 NFT in the same pool - Currently done with multiple NFTs per stake entry. 
         Perhaps dig deeper into PDAs and seeds to find another solution (like a user having multiple PDAs? Is it worth it?)?
@@ -388,6 +387,8 @@ pub mod vinci_stake {
     4. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) - Currently done with two different functions
 
     Vinci stake will interact (cpi) with vinci rewards - Done
+    Clear no used variables from stack struct
+    Do a full cycle test (Stake, update, get reward, claim stake)
 
  */
 

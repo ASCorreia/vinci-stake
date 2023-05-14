@@ -1,0 +1,22 @@
+[package]
+name = "vinci-accounts"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "vinci_accounts"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.27.0"
+anchor-spl = "0.27.0"
+spl-token = "3.5.0"
+mpl-token-metadata = {version = "1.10.0", features = ["no-entrypoint"]}

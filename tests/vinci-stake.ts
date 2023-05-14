@@ -1,13 +1,15 @@
 import * as anchor from "@project-serum/anchor";
 import { Program, AnchorProvider } from "@project-serum/anchor";
 import { VinciStake } from "../target/types/vinci_stake";
+import { VinciRewards } from "../target/types/vinci_rewards";
+import { VinciAccounts } from "../target/types/vinci_accounts";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
 import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount, createInitializeMintInstruction} from "@solana/spl-token";
 
-import { Connection, clusterApiUrl, ConfirmOptions} from "@solana/web3.js"; //used to test the metaplex findByMint function
+import { Connection, clusterApiUrl, ConfirmOptions, PublicKey, SystemProgram} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { keypair } from "../wallet";
-import { VinciRewards } from "../target/types/vinci_rewards";
+import assert from 'assert';
 
 describe("vinci-stake", () => {
   // Configure the client to use the local cluster.
@@ -29,6 +31,7 @@ describe("vinci-stake", () => {
 
   const program = anchor.workspace.VinciStake as Program<VinciStake>;
   const rewardsProgram = anchor.workspace.VinciRewards as Program<VinciRewards>;
+  const accountsProgram = anchor.workspace.VinciAccounts as Program<VinciAccounts>;
 
   console.log("\nProvider public key", key.wallet.publicKey.toString());
 
@@ -269,6 +272,64 @@ describe("vinci-stake", () => {
     accounts.forEach((account, i) => {
       console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
     });*/
-
   });
+  it ("Quest simulation", async() => {
+    const account = anchor.web3.Keypair.generate();
+
+    const [vinciWorldPDA, _] = await PublicKey.findProgramAddress(
+    [
+      anchor.utils.bytes.utf8.encode("VinciWorldAccount"),
+      key.wallet.publicKey.toBuffer(),
+    ],
+    accountsProgram.programId
+    );
+
+    console.log("Vinci World PDA address ", vinciWorldPDA);
+    
+    const tx = await accountsProgram.methods.startStuffOff().accounts({
+          baseAccount: vinciWorldPDA, //account.publicKey,
+          user: key.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        }).rpc(); //.signers[account] before rpc()
+
+    console.log("Vinci World PDA account created with Transaction", tx);
+
+    /* Deprecated method
+    const tx = await program.rpc.startStuffOff({
+        accounts: {
+          baseAccount: account.publicKey,
+          user: key.wallet.publicKey,
+          systemProgram: web3.SystemProgram.programId,
+        },
+        signers: [account]
+      });*/
+
+    let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
+    
+    console.log("Total Ammount Of Tokens", fetchAccount.totalAmount.toString());
+    console.log("Owner of the account: ", fetchAccount.owner.toString());
+    console.log("Address of the provider: ", key.wallet.publicKey.toString());
+    assert.equal(fetchAccount.totalAmount.toString(), "0");
+
+    const addValue = await accountsProgram.methods.addAmmount(new anchor.BN(15)).accounts({
+        baseAccount: vinciWorldPDA, //account.publicKey,
+    }).rpc();
+    //can we pass more than one ammount and accounts?
+
+    let fetchAccount2 = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
+    console.log("Match won - 15 Tokens awarded");
+    console.log("Total Ammount Of Tokens", fetchAccount2.totalAmount.toString());
+    assert.equal(fetchAccount2.totalAmount.toString(), "15");
+
+    const tournamentPay = await accountsProgram.methods.payTournament(new anchor.BN(30)).accounts({
+        user: key.wallet.publicKey,
+    }).remainingAccounts([{pubkey: vinciWorldPDA, isSigner: false, isWritable: true}]).rpc();
+    console.log("Tournament transaction details: ", tournamentPay);
+    console.log("Signer wallet address (Provider): ", key.wallet.publicKey);
+
+    let fetchAccount3 = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
+    console.log("Tournament won - 30 Tokens awarded");
+    console.log("Total Ammount Of Tokens", fetchAccount3.totalAmount.toString());
+    assert.equal(fetchAccount3.totalAmount.toString(), "45");
+});
 });

@@ -4,6 +4,7 @@ skip-lint = false
 [programs.devnet]
 vinci_stake = "EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV"
 vinci_rewards = "4DszCYyUCeXYX3qRQoTdWscvXUyMkGmAm7KMrgLYX4FF"
+vinci_accounts = "38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ"
 
 [registry]
 url = "https://api.apr.dev"
