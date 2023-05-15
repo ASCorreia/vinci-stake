@@ -361,7 +361,7 @@ pub mod vinci_stake {
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
 
         let cpi_program = ctx.accounts.rewards_program.to_account_info();
-        let cpi_accounts = vinci_rewards::cpi::accounts::Initialize {
+        let cpi_accounts = vinci_rewards::cpi::accounts::Initialize{
             account: ctx.accounts.stake_entry.to_account_info(),
         };
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);

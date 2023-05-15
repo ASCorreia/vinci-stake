@@ -4,7 +4,7 @@ use crate::*;
 pub struct StartStuffOff<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(init, seeds = [b"VinciWorldAccount", user.key().as_ref()], bump, payer = user, space = 3500)]
+    #[account(init, seeds = [b"VinciWorldAccount1", user.key().as_ref()], bump, payer = user, space = 3500)]
     pub base_account: Account<'info, BaseAccount>,
     pub system_program: Program<'info, System>
 }

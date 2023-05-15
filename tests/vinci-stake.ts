@@ -278,7 +278,7 @@ describe("vinci-stake", () => {
 
     const [vinciWorldPDA, _] = await PublicKey.findProgramAddress(
     [
-      anchor.utils.bytes.utf8.encode("VinciWorldAccount"),
+      anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
       key.wallet.publicKey.toBuffer(),
     ],
     accountsProgram.programId
