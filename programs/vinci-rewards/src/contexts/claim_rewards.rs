@@ -1,3 +1,5 @@
+use vinci_accounts::{program::VinciAccounts, BaseAccount};
+
 use crate::*;
 
 #[account]
@@ -21,7 +23,14 @@ pub struct StakeEntry {
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     /// CHECK: This is not dangerous because we don't read or write from this account
-    pub account: AccountInfo<'info>,
+    pub stake_entry: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub vinci_account: Box<Account<'info, BaseAccount>>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    pub accounts_program: Program<'info, VinciAccounts>,
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]

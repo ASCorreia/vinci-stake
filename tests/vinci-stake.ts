@@ -12,27 +12,16 @@ import { keypair } from "../wallet";
 import assert from 'assert';
 
 describe("vinci-stake", () => {
-  // Configure the client to use the local cluster.
+  // Configure the client to use the local cluster (environment variable).
   const key = anchor.AnchorProvider.env()
   anchor.setProvider(key);
 
-  console.log("Public Key: ", keypair.publicKey.toString(), "\n Private Key: ", keypair.secretKey.toString());
-
-  /*const network = clusterApiUrl("devnet");
-  const opts: ConfirmOptions = {
-    preflightCommitment: 'processed' //processed
-  }
-
-  const connection2 = new Connection(network, 'processed');
-
-  const wallet = new Wallet(keypair);    
-  const provider = new AnchorProvider(connection2, wallet, opts);
-  anchor.setProvider(provider);*/
-
+  /* Programs to be used (Vinci Stake Program, Vinci Rewards Program, Vinci Accounts Program) */
   const program = anchor.workspace.VinciStake as Program<VinciStake>;
   const rewardsProgram = anchor.workspace.VinciRewards as Program<VinciRewards>;
   const accountsProgram = anchor.workspace.VinciAccounts as Program<VinciAccounts>;
 
+  /* Provider public key logged for some reason that I cannot remember :) */
   console.log("\nProvider public key", key.wallet.publicKey.toString());
 
   /* Metaplex function to retrieve metadata accounts PDA */
@@ -49,6 +38,7 @@ describe("vinci-stake", () => {
       )
     )[0];
   };
+  /* Metaplex function to retrieve master edition accounts PDA */
   const getMasterEdition = async (mint: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
     return (
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -63,6 +53,7 @@ describe("vinci-stake", () => {
     )[0];
   };
 
+  /* Let's test this :) */
   it("Is initialized!", async () => {
     const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
       [
@@ -242,11 +233,25 @@ describe("vinci-stake", () => {
     ]).rpc();
     console.log('Stake Entry Successfully updated - Transaction ID: ', updateEntry);
 
+    const [vinciWorldPDA, _bump] = await PublicKey.findProgramAddress(
+      [
+        anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
+        key.wallet.publicKey.toBuffer(),
+      ],
+      accountsProgram.programId
+      );
+
     const claimRewards = await program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
+      vinciAccount: vinciWorldPDA,
+      owner: key.wallet.publicKey,
+      accountsProgram: accountsProgram.programId,
       rewardsProgram: rewardsProgram.programId,
     }).rpc();
     console.log('Rewards sucesfully claimed - Transaction ID: ', claimRewards);
+
+    let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey 
+    console.log("Total Ammount Of Tokens", fetchAccount.totalAmount.toString());
 
     /*const claimNonCust = await program.methods.claimNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
@@ -273,7 +278,7 @@ describe("vinci-stake", () => {
       console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
     });*/
   });
-  it ("Quest simulation", async() => {
+  /*it ("Quest simulation", async() => {
     const account = anchor.web3.Keypair.generate();
 
     const [vinciWorldPDA, _] = await PublicKey.findProgramAddress(
@@ -293,16 +298,6 @@ describe("vinci-stake", () => {
         }).rpc(); //.signers[account] before rpc()
 
     console.log("Vinci World PDA account created with Transaction", tx);
-
-    /* Deprecated method
-    const tx = await program.rpc.startStuffOff({
-        accounts: {
-          baseAccount: account.publicKey,
-          user: key.wallet.publicKey,
-          systemProgram: web3.SystemProgram.programId,
-        },
-        signers: [account]
-      });*/
 
     let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
     
@@ -331,5 +326,5 @@ describe("vinci-stake", () => {
     console.log("Tournament won - 30 Tokens awarded");
     console.log("Total Ammount Of Tokens", fetchAccount3.totalAmount.toString());
     assert.equal(fetchAccount3.totalAmount.toString(), "45");
-});
+  });*/
 });

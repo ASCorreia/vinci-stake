@@ -362,7 +362,10 @@ pub mod vinci_stake {
 
         let cpi_program = ctx.accounts.rewards_program.to_account_info();
         let cpi_accounts = vinci_rewards::cpi::accounts::Initialize{
-            account: ctx.accounts.stake_entry.to_account_info(),
+            stake_entry: ctx.accounts.stake_entry.to_account_info(),
+            vinci_account: ctx.accounts.vinci_account.to_account_info(),
+            accounts_program: ctx.accounts.accounts_program.to_account_info(),
+            owner: ctx.accounts.owner.to_account_info(),
         };
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         vinci_rewards::cpi::initialize(cpi_ctx)?;

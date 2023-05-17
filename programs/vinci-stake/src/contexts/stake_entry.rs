@@ -1,3 +1,5 @@
+use vinci_accounts::{BaseAccount, program::VinciAccounts};
+
 use crate::*;
 
 #[derive(Accounts)]
@@ -23,8 +25,13 @@ pub struct InitializeStakeEntry<'info> {
 #[derive(Accounts)]
 pub struct ClaimRewards<'info> {
     #[account(mut)]
-    pub stake_entry: Account<'info, StakeEntry>,
+    pub stake_entry: Box<Account<'info, StakeEntry>>,
+    #[account(mut)]
+    pub vinci_account: Box<Account<'info, BaseAccount>>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
 
+    pub accounts_program: Program<'info, VinciAccounts>,
     pub rewards_program: Program<'info, VinciRewards>,
 }
 
