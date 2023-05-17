@@ -21,6 +21,38 @@ describe("vinci-stake", () => {
   const rewardsProgram = anchor.workspace.VinciRewards as Program<VinciRewards>;
   const accountsProgram = anchor.workspace.VinciAccounts as Program<VinciAccounts>;
 
+  /* --------------------------------- Derive the necessary PDAs ---------------------------------- */
+  /* Derive a PDA for the vinci accounts program */
+  const [vinciWorldPDA, _bump] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
+      key.wallet.publicKey.toBuffer(),
+    ],
+    accountsProgram.programId
+  );
+  console.log("Vinci World account: ", vinciWorldPDA.toBase58());
+
+  /* Derive a PDA for a Vinci Stake Pool */
+  const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("VinciWorldStakePool_28"),
+      key.wallet.publicKey.toBuffer(),
+    ],
+    program.programId
+  );
+  console.log("Vinci World Staking Pool account: ", vinciWorldStake.toBase58());
+
+  /* Derive a PDA for a Vinci Stake Entry */
+  const [vinciWorldStakeEntry, bump] = anchor.web3.PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_28"),
+      key.wallet.publicKey.toBuffer(),
+    ],
+    program.programId
+  )
+  console.log("Vinci Worls Stake Entry account: ", vinciWorldStakeEntry.toBase58());
+  /* --------------------------------- Derive the necessary PDAs ---------------------------------- */
+
   /* Provider public key logged for some reason that I cannot remember :) */
   console.log("\nProvider public key", key.wallet.publicKey.toString());
 
@@ -55,15 +87,6 @@ describe("vinci-stake", () => {
 
   /* Let's test this :) */
   it("Is initialized!", async () => {
-    const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakePool_28"),
-        key.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-      );
-    console.log("Vinci World Staking Pool account: ", vinciWorldStake);
-    // Add your test here.
     /*const stakePoolTx = await program.methods.initializeStakePool().accounts({
       stakePool: vinciWorldStake,
       user: key.wallet.publicKey,
@@ -99,7 +122,7 @@ describe("vinci-stake", () => {
     try {
       receiverTokenAccount = await getAccount(
         connection,
-        associatedTokenAccountFrom,
+        associatedTokenAccountTo,
         "confirmed",
         TOKEN_PROGRAM_ID
       )
@@ -116,16 +139,6 @@ describe("vinci-stake", () => {
       console.log("Ata created: ", ataTx);
     } 
 
-
-    const [vinciWorldStakeEntry, bump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_28"),
-        key.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    )
-    console.log("Vinci Worls Stake Entry account: ", vinciWorldStakeEntry);
-    console.log("Vinci Worls Stake Entry account bump: ", bump);
     /*const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
       user: key.wallet.publicKey,
 
@@ -174,13 +187,6 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
 
-    const [vinciWorldNonCustodial, bumpNonCustodial] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("PDA_CENAS"),
-      ],
-      program.programId
-    )
-
     const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
 
     let receiverTokenAccount2: any
@@ -212,7 +218,7 @@ describe("vinci-stake", () => {
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
-      fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
+      fromMintTokenAccount: associatedTokenAccountFrom,
       toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
       user: keypair.publicKey, //key.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
@@ -232,14 +238,6 @@ describe("vinci-stake", () => {
       {pubkey: vinciWorldStakeEntry, isSigner: false, isWritable: true}   
     ]).rpc();
     console.log('Stake Entry Successfully updated - Transaction ID: ', updateEntry);
-
-    const [vinciWorldPDA, _bump] = await PublicKey.findProgramAddress(
-      [
-        anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
-        key.wallet.publicKey.toBuffer(),
-      ],
-      accountsProgram.programId
-      );
 
     const claimRewards = await program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
@@ -270,29 +268,10 @@ describe("vinci-stake", () => {
       }
     );
     console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);*/
-
-   /*const accounts = await connection.getProgramAccounts(program.programId);
-    console.log("\n\nProgram Owned Accounts:\n", accounts);
-
-    accounts.forEach((account, i) => {
-      console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
-    });*/
   });
   /*it ("Quest simulation", async() => {
-    const account = anchor.web3.Keypair.generate();
-
-    const [vinciWorldPDA, _] = await PublicKey.findProgramAddress(
-    [
-      anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
-      key.wallet.publicKey.toBuffer(),
-    ],
-    accountsProgram.programId
-    );
-
-    console.log("Vinci World PDA address ", vinciWorldPDA);
-    
     const tx = await accountsProgram.methods.startStuffOff().accounts({
-          baseAccount: vinciWorldPDA, //account.publicKey,
+          baseAccount: vinciWorldPDA,
           user: key.wallet.publicKey,
           systemProgram: SystemProgram.programId,
         }).rpc(); //.signers[account] before rpc()
@@ -307,7 +286,7 @@ describe("vinci-stake", () => {
     assert.equal(fetchAccount.totalAmount.toString(), "0");
 
     const addValue = await accountsProgram.methods.addAmmount(new anchor.BN(15)).accounts({
-        baseAccount: vinciWorldPDA, //account.publicKey,
+        baseAccount: vinciWorldPDA,
     }).rpc();
     //can we pass more than one ammount and accounts?
 
@@ -328,3 +307,11 @@ describe("vinci-stake", () => {
     assert.equal(fetchAccount3.totalAmount.toString(), "45");
   });*/
 });
+
+/* Things to consider */
+/*const accounts = await connection.getProgramAccounts(program.programId);
+  console.log("\n\nProgram Owned Accounts:\n", accounts);
+
+  accounts.forEach((account, i) => {
+  console.log(`-- Program owned account ${i + 1}: ${account.pubkey.toString()} --`);
+});*/

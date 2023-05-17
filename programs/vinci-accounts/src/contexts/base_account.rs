@@ -39,7 +39,7 @@ pub struct BurnToken<'info> {
 
 #[derive(Accounts)]
 pub struct AddAmount<'info> {
-    #[account(mut)]
+    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump)]
     pub base_account: Account<'info, BaseAccount>,
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -47,7 +47,7 @@ pub struct AddAmount<'info> {
 
 #[derive(Accounts)]
 pub struct RemoveAmmount<'info> {
-    #[account(mut)]
+    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump)]
     pub base_account: Account<'info, BaseAccount>,
     #[account(mut)]
     pub owner: Signer<'info>,

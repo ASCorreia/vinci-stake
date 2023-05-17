@@ -26,7 +26,12 @@ pub mod vinci_rewards {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         msg!("CPI created to interact to Vinci Accounts Program: {:?}", cpi_ctx.program.key());
 
-        vinci_accounts::cpi::add_ammount(cpi_ctx, 50)?;
+        let amount_to_transfer = match total_staked {
+            u128::MIN..=90000 => 50,
+            _ => 100,
+        };
+
+        vinci_accounts::cpi::add_ammount(cpi_ctx, amount_to_transfer)?;
         msg!("Call to Vinci Accounts program succesfull");
 
         Ok(())
@@ -35,6 +40,6 @@ pub mod vinci_rewards {
 
 // ----- Next Steps ----- //
 /*
-    1. Vinci rewards will interact with vinci world main contract to update accounts - Amount of tokens, etc.
+    1. Vinci rewards will interact with vinci world main contract to update accounts - Amount of tokens, etc. - Done
     2. Mint NFT function should be moved to rewards program?
- */
+*/
