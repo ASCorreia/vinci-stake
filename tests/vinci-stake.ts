@@ -214,7 +214,7 @@ describe("vinci-stake", () => {
 
     console.log('The token account info is:', tokenAccountData);
 
-    /*const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
+    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
@@ -230,7 +230,7 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
+    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
 
     const updateEntry = await program.methods.updateStake().accounts({
       stakePool: key.publicKey,
