@@ -390,9 +390,9 @@ pub mod vinci_stake {
     4. Custodial and non custodial staking (Shall two different operations be used, or just one generic one with a bool argument?) - Currently done with two different functions
 
     Vinci stake will interact (cpi) with vinci rewards - Done
-    Vinci rewards needs to interact (cpi) with vinci accounts - TBD
+    Vinci rewards needs to interact (cpi) with vinci accounts - Done
     Clear no used variables from stack struct - TBD
-    Do a full cycle test (Stake, update, get reward, claim stake) - TBD
+    Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
 
  */
 
