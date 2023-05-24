@@ -393,6 +393,7 @@ pub mod vinci_stake {
     Vinci rewards needs to interact (cpi) with vinci accounts - Done
     Clear no used variables from stack struct - TBD
     Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
+    Review main structures for the staking platforms and check wheter the logic can be simplified
 
  */
 
