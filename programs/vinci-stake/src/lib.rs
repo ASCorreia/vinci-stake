@@ -151,7 +151,6 @@ pub mod vinci_stake {
         msg!("stake_entry: {:?}", stake_entry.to_account_info().key);
         msg!("original_mint: {:?}", original_mint.key);
         msg!("user_token_account: {:?}", user_token_accout.to_account_info().key);
-        //msg!("delegate: {:?}", delegate.to_account_info().key);
         msg!("authority: {:?}", authority.key);
         msg!("token_program: {:?}", program_id.to_account_info().key);
         msg!("master_edition: {:?}", token_edition.to_account_info().key);
