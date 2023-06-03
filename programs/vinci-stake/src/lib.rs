@@ -340,10 +340,10 @@ pub mod vinci_stake {
 
             //Update the stake time 
             for index in 0..stake_entry.original_mint_seconds_struct.len() {
-                let total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(
+                let total_stake_seconds = stake_entry.original_mint_seconds_struct[index].time + (stake_entry.total_stake_seconds.saturating_add(
                     (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
                         .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
-                );
+                ));
 
                 stake_entry.original_mint_seconds_struct[index].time = total_stake_seconds;
             }
@@ -360,15 +360,23 @@ pub mod vinci_stake {
 
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
 
+        let stake_entry = &mut ctx.accounts.stake_entry;
+
         let cpi_program = ctx.accounts.rewards_program.to_account_info();
         let cpi_accounts = vinci_rewards::cpi::accounts::Initialize{
-            stake_entry: ctx.accounts.stake_entry.to_account_info(),
+            stake_entry: stake_entry.to_account_info(),
             vinci_account: ctx.accounts.vinci_account.to_account_info(),
             accounts_program: ctx.accounts.accounts_program.to_account_info(),
             owner: ctx.accounts.owner.to_account_info(),
         };
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         vinci_rewards::cpi::initialize(cpi_ctx)?;
+
+        // Since the rewards have been claimed, set the stacked time of each mint to 0
+        for index in 0..stake_entry.original_mint_seconds_struct.len() {
+            stake_entry.original_mint_seconds_struct[index].time = 0;
+        }
+
 
         Ok(())
     }
@@ -394,6 +402,8 @@ pub mod vinci_stake {
     Clear no used variables from stack struct - TBD
     Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
     Review main structures for the staking platforms and check wheter the logic can be simplified
+
+    Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL
 
  */
 

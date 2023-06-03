@@ -187,7 +187,7 @@ describe("vinci-stake", () => {
     }).rpc();
     console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
 
-    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
+    /*const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
 
     let receiverTokenAccount2: any
     try {
@@ -230,7 +230,7 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
+    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
 
     const updateEntry = await program.methods.updateStake().accounts({
       stakePool: key.publicKey,
