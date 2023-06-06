@@ -54,6 +54,7 @@ pub mod vinci_stake {
         stake_entry.original_mint_seconds_struct = Vec::new();
         stake_entry.original_owner = ctx.accounts.user.key();
 
+        // All the checks below shouls be moved to the stake function? Since we are allowing multiple stakes per user
         // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
         assert_derivation(
             &mpl_token_metadata::id(),
@@ -109,6 +110,7 @@ pub mod vinci_stake {
 
         //Set the last staked time
         stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
+        stake_entry.last_updated_at = Some(Clock::get().unwrap().unix_timestamp);
         
         //Update the total staked time
         stake_entry.total_stake_seconds = stake_entry.total_stake_seconds.saturating_add(

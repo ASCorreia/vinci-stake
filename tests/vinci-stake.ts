@@ -238,7 +238,14 @@ describe("vinci-stake", () => {
       {pubkey: vinciWorldStakeEntry, isSigner: false, isWritable: true}   
     ]).rpc();
     console.log('Stake Entry Successfully updated - Transaction ID: ', updateEntry);
-
+    const test = program.methods.claimRewards().accounts({
+      stakeEntry: vinciWorldStakeEntry,
+      vinciAccount: vinciWorldPDA,
+      owner: key.wallet.publicKey,
+      accountsProgram: accountsProgram.programId,
+      rewardsProgram: rewardsProgram.programId,
+    });
+    console.log(test);
     const claimRewards = await program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
       vinciAccount: vinciWorldPDA,

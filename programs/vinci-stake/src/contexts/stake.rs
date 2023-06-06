@@ -15,7 +15,7 @@ pub struct StakeCtx<'info>{
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub master_edition: UncheckedAccount<'info>,
+    pub master_edition: AccountInfo<'info>,
 
     #[account(mut)]
     pub from_mint_token_account: Box<Account<'info, TokenAccount>>,
@@ -32,7 +32,7 @@ pub struct StakeCtx<'info>{
     pub test: AccountInfo<'info>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
-    pub token_metadata_program: UncheckedAccount<'info>,
+    pub token_metadata_program: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
