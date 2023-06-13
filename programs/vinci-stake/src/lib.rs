@@ -404,7 +404,7 @@ pub mod vinci_stake {
     Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
     Review main structures for the staking platforms and check wheter the logic can be simplified
 
-    Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL
+    Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL(in progress)
 
  */
 
