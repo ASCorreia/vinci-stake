@@ -16,6 +16,8 @@ pub use error::*;
 
 #[program]
 pub mod vinci_accounts {
+    use std::any;
+
     use super::*;
 
     pub fn start_stuff_off(ctx: Context<StartStuffOff>) -> Result<()> {
@@ -139,8 +141,8 @@ pub mod vinci_accounts {
         let tournament_list = &mut ctx.accounts.tournament_list;
 
         require!(ctx.accounts.user.is_signer == true && ctx.accounts.user.key() == tournament_list.owner, CustomError::WrongSigner);
-        if tournament_list.tournament_list.contains(&base_account.key()) == false {
-            tournament_list.tournament_list.push(base_account.key());
+        if !tournament_list.tournament_list.iter().any(|t| t.user == base_account.key()) {
+            tournament_list.tournament_list.push(TournamentStruct { user: base_account.key(), score: 0 });
         }
         Ok(())
     }

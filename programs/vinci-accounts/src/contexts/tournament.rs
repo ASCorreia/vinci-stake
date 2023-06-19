@@ -28,9 +28,16 @@ pub struct PayTournament2<'info> {
     pub owner: Signer<'info>,
 }
 
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub struct TournamentStruct {
+    pub user: Pubkey,
+    pub score: usize,
+}
+
+
 #[account]
 pub struct Tournament {
     pub owner: Pubkey,
-    pub tournament_list: Vec<Pubkey>,
+    pub tournament_list: Vec<TournamentStruct>,
     pub prize_pool: u32,
 }
