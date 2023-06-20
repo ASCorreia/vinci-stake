@@ -16,7 +16,6 @@ pub use error::*;
 
 #[program]
 pub mod vinci_accounts {
-    use std::any;
 
     use super::*;
 

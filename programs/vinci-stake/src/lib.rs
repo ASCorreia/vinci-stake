@@ -400,9 +400,9 @@ pub mod vinci_stake {
 
     Vinci stake will interact (cpi) with vinci rewards - Done
     Vinci rewards needs to interact (cpi) with vinci accounts - Done
-    Clear no used variables from stack struct - TBD
-    Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
-    Review main structures for the staking platforms and check wheter the logic can be simplified
+    !!! 3 - Clear no used variables from stack struct - TBD
+    !!! 2 - Do a full cycle test (Stake, update, get reward, claim stake) - TBD (Tests to be optimized (readibility))
+    !!! 1 - Review main structures for the staking platforms and check wheter the logic can be simplified
 
     Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL(in progress)
 
