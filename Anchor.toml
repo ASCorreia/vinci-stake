@@ -5,6 +5,7 @@ skip-lint = false
 vinci_stake = "EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV"
 vinci_rewards = "4DszCYyUCeXYX3qRQoTdWscvXUyMkGmAm7KMrgLYX4FF"
 vinci_accounts = "38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ"
+vinci_swap = "GeXG8abTTediTsezVsBGBuxRWuZ15wK2UDd45dQ3vQKq"
 
 [registry]
 url = "https://api.apr.dev"

@@ -31,7 +31,7 @@ pub struct PayTournament2<'info> {
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct TournamentStruct {
     pub user: Pubkey,
-    pub score: usize,
+    pub score: u32,
 }
 
 

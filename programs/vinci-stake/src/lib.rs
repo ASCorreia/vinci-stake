@@ -405,6 +405,7 @@ pub mod vinci_stake {
     !!! 1 - Review main structures for the staking platforms and check wheter the logic can be simplified
 
     Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL(in progress)
+    Add the swap program to the project and deploy it to devnet
 
  */
 
