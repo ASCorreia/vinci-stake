@@ -72,7 +72,7 @@ pub mod vinci_stake {
         let mint_metadata_data = ctx.accounts.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
         require!(ctx.accounts.original_mint_metadata.to_account_info().owner.key() == mpl_token_metadata::id(), CustomError::InvalidMintOwner); //Checks that the owner is the Metadadata program
         let original_mint_metadata = Metadata::deserialize(&mut mint_metadata_data.as_ref()).expect("Error deserializng metadata");
-        require!(original_mint_metadata.mint == ctx.accounts.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored i nthe account are the same
+        require!(original_mint_metadata.mint == ctx.accounts.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored in the account are the same
 
         //Get the creators from the metadata and see if the it contains the ones required by the stake pool
         let creators = original_mint_metadata.data.creators.unwrap();
@@ -405,7 +405,8 @@ pub mod vinci_stake {
     !!! 1 - Review main structures for the staking platforms and check wheter the logic can be simplified
 
     Start considering the possibility of creating a Vinci Dex with SPL tokens and SOL(in progress)
-    Add the swap program to the project and deploy it to devnet
+    Add the swap program to the project and deploy it to devnet - Done
+    Review tournaments and layouts
 
  */
 
