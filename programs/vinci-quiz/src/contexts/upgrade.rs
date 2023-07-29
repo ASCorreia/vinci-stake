@@ -73,6 +73,8 @@ impl<'info> MegaUpgrade<'info> {
 
         require!(player.level == 10, CustomError::InsufficientLevel);
 
+        require!(player.nft_minted == false, CustomError::NftAlreadyMinted);
+
         msg!("Initializing Mint NFT");
         let cpi_accounts = MintTo {
             mint: self.mint.to_account_info(),
@@ -159,6 +161,8 @@ impl<'info> MegaUpgrade<'info> {
             master_edition_infos.as_slice(),
         )?;
         msg!("Master Edition Nft Minted !!!");
+
+        player.nft_minted = true;
 
         Ok(())
     }

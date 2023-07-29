@@ -8,4 +8,8 @@ pub enum CustomError {
     InsufficientPoints,
     #[msg("Insufficient Level for Mega Upgrade")]
     InsufficientLevel,
+    #[msg("NFT Already Minted")]
+    NftAlreadyMinted,
+    #[msg("Invalid Authority")]
+    InvalidAuthority,
 }

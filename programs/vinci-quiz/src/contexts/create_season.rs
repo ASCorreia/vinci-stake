@@ -32,5 +32,6 @@ pub struct Initialize<'info> {
 pub struct UserEntry {
     pub score: u32,
     pub level: u8,
+    pub nft_minted: bool,
     pub user: Pubkey,
 }

@@ -17,7 +17,7 @@ impl<'info> AddPlayer<'info> {
         match self.vinci_quiz.tournament.iter().find(|entry| entry.user == self.user.key()) {
             None => {
                 self.realloc(37, &self.user, &self.system_program)?;
-                self.vinci_quiz.tournament.push(UserEntry{ score: 0, user: self.user.key(), level: 1 });
+                self.vinci_quiz.tournament.push(UserEntry{ score: 0, user: self.user.key(), level: 1, nft_minted: false });
                 self.vinci_quiz.entries += 1;
                 Ok(())
             }

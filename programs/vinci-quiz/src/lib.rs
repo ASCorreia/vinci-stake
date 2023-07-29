@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use std::str::FromStr;
 
 declare_id!("5wvAnEqxro6JLFTkCTHtCnd4daWjPpEkDiK7HgrUEZcd");
 
@@ -56,6 +57,16 @@ pub mod vinci_quiz {
 
     pub fn mega_upgrade(ctx: Context<MegaUpgrade>, creator_key: Pubkey, uri: String, title: String) -> Result<()> {
         ctx.accounts.mega_upgrade(creator_key, uri, title)?;
+
+        Ok(())
+    }
+
+    pub fn season_rewards(ctx: Context<SeasonRewards>) -> Result<()> {
+        require!(ctx.accounts.authority.key() == Pubkey::from_str("6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ").unwrap(), CustomError::InvalidAuthority);
+
+        for account in ctx.remaining_accounts.iter() {
+            
+        }
 
         Ok(())
     }
