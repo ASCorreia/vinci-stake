@@ -54,6 +54,12 @@ pub mod vinci_quiz {
         Ok(())
     }
 
+    pub fn mega_upgrade(ctx: Context<MegaUpgrade>, creator_key: Pubkey, uri: String, title: String) -> Result<()> {
+        ctx.accounts.mega_upgrade(creator_key, uri, title)?;
+
+        Ok(())
+    }
+
     pub fn close_season(ctx: Context<CloseSeason>) -> Result<()> {
         ctx.accounts.close_season()?;
 

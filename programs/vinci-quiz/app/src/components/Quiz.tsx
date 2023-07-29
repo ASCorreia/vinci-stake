@@ -14,6 +14,7 @@ import { program } from '@project-serum/anchor/dist/cjs/native/system';
 import { ASSOCIATED_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token';
 import { findProgramAddressSync } from '@project-serum/anchor/dist/cjs/utils/pubkey';
 import { generateKeyPair } from 'crypto';
+import { MINT_SIZE, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, createInitializeMintInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 const idl_string = JSON.stringify(idl);
 const idl_object = JSON.parse(idl_string);
@@ -41,11 +42,6 @@ export const Quiz: FC = () => {
     const [scores, setScores] = useState([]);
 
     const [players, setPlayers] = useState([]);
-    
-    const [poolPDA2, setPoolPDA2] = useState([]);
-
-    const [poolBalance1, setPoolBalance1] = useState(0);
-    const [poolBalance2, setPoolBalance2] = useState(0);
 
     const playerList: web3.AccountMeta[] = [];
 
@@ -76,6 +72,36 @@ export const Quiz: FC = () => {
 
     const mint1 = new PublicKey("8LbiacZvDREPUa5a7Ljth16G9p1BoKXccqs5cMcjuhfu");
     const mint2 = new PublicKey("E7sRawws3T77FLf5P7u5W1gBA9ex2H6TfFCxKQJA2TYA");
+
+    //Define a mint keypair
+    let NFTmintKey = web3.Keypair.generate();
+
+    const TOKEN_METADATA_PROGRAM_ID = new web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
+    const getMetadata = (mint: PublicKey) => {
+        return (
+                web3.PublicKey.findProgramAddressSync(
+                [
+                    Buffer.from("metadata"),
+                    TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+                    mint.toBuffer(),
+                ],
+            TOKEN_METADATA_PROGRAM_ID
+            )
+        )[0];
+    };
+    const getMasterEdition = (mint: PublicKey) => {
+        return (
+            web3.PublicKey.findProgramAddressSync(
+                [
+                    Buffer.from("metadata"),
+                    TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+                    mint.toBuffer(),
+                    Buffer.from("edition"),
+                ],
+            TOKEN_METADATA_PROGRAM_ID
+            )
+    )[0];
+    };
 
     const vinciAccountPDA = findProgramAddressSync([utils.bytes.utf8.encode("VinciWorldAccount1"), anchProvider.publicKey.toBuffer()], accountsProgramID);
 
@@ -259,6 +285,73 @@ export const Quiz: FC = () => {
         }
     }
 
+    const megaUpgrade = async (user: PublicKey) => {
+        try {
+          //const key = key.wallet.publicKey;
+          const lamports = await program.provider.connection.getMinimumBalanceForRentExemption(MINT_SIZE);
+    
+          //Get the ATA for a token on a public key (but might not exist yet)
+          //let receiver = new anchor.web3.PublicKey("6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ");
+          const associatedTokenAccount = await getAssociatedTokenAddress(NFTmintKey.publicKey, anchProvider.wallet.publicKey); //key.wallet.publicKey
+    
+          //Fires a list of instructions
+          const mint_nft_tx = new web3.Transaction().add(
+            //Use anchor to creante an account from the key we created
+            web3.SystemProgram.createAccount({
+              fromPubkey: anchProvider.wallet.publicKey,
+              newAccountPubkey: NFTmintKey.publicKey,
+              space: MINT_SIZE,
+              programId: TOKEN_PROGRAM_ID,
+              lamports,
+            }),
+            //creates, through a transaction, our mint account that is controlled by our anchor wallet (key)
+            createInitializeMintInstruction(NFTmintKey.publicKey, 0, anchProvider.wallet.publicKey, anchProvider.wallet.publicKey),
+    
+            //Creates the ATA account that is associated with our mint on our anchor wallet (key)
+            createAssociatedTokenAccountInstruction(anchProvider.wallet.publicKey, associatedTokenAccount, anchProvider.wallet.publicKey, NFTmintKey.publicKey)
+          );
+    
+          //Sends and create the transaction
+          console.log("Sending transaction");
+          const res = await anchProvider.sendAndConfirm(mint_nft_tx, [NFTmintKey]);
+    
+          console.log(await program.provider.connection.getParsedAccountInfo(NFTmintKey.publicKey));
+    
+          console.log("Account: ", res);
+          console.log("Mint Key: ", NFTmintKey.publicKey.toString());
+          console.log("User: ", anchProvider.wallet.publicKey.toString());
+    
+    
+          //Starts the Mint Operation
+          console.log("Starting the NFT Mint Operation");
+          const metadataAddress = getMetadata(NFTmintKey.publicKey);
+          const masterEdition = getMasterEdition(NFTmintKey.publicKey);
+          //Executes our smart contract to mint our token into our specified ATA
+          const tx = await programQuiz.methods.megaUpgrade(
+            new web3.PublicKey("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ"),
+            "https://arweave.net/Pe4erqz3MZoywHqntUGZoKIoH0k9QUykVDFVMjpJ08s",
+            "Vinci World EA").accounts({
+                vinciQuiz: vinciQuizPDA[0],
+                user: user,
+                authority: anchProvider.wallet.publicKey,
+                mintAuthority: anchProvider.wallet.publicKey,
+                mint: NFTmintKey.publicKey,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                metadata: metadataAddress,
+                tokenAccount: associatedTokenAccount,
+                tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+                payer: anchProvider.wallet.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+                rent: web3.SYSVAR_RENT_PUBKEY,
+                masterEdition: masterEdition,
+            }).rpc({skipPreflight: true});
+          console.log("Your transaction signature", tx);
+          console.log("NFT Mint Operation Finished!");
+        } catch (error) {
+          console.error("Error Minting NFT: ", error);
+        }
+      }
+
     const closeAccount = async (account: PublicKey) => {
         try {
             const tx = await programAccounts.methods.closeAccount().accounts({
@@ -327,7 +420,7 @@ export const Quiz: FC = () => {
                     </button>
                     <button
                         className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-                        onClick={() => updateScore(score.tournament[0].user, true)} disabled={!ourWallet.publicKey}
+                        onClick={() => megaUpgrade(score.tournament[0].user)} disabled={!ourWallet.publicKey}
                     >
                         <div className="hidden group-disabled:block ">
                         Wallet not connected
@@ -375,7 +468,7 @@ export const Quiz: FC = () => {
                     </button>
                     <button
                         className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-                        onClick={() => updateScore(score.tournament[1].user, true)} disabled={!ourWallet.publicKey}
+                        onClick={() => megaUpgrade(score.tournament[1].user)} disabled={!ourWallet.publicKey}
                     >
                         <div className="hidden group-disabled:block ">
                         Wallet not connected
