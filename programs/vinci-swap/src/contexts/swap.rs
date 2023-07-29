@@ -26,7 +26,7 @@ pub struct Swap<'info> {
     #[account(mut, associated_token::mint = user_pay_mint, associated_token::authority = vinci_swap)]
     pub pool_pay_token_account: Box<Account<'info, TokenAccount>>,
     //User token account to where the tokens will be sent to
-    #[account(mut, associated_token:: mint = user_pay_mint, associated_token::authority = user)]
+    #[account(mut, associated_token::mint = user_pay_mint, associated_token::authority = user)]
     pub user_pay_token_account: Box<Account<'info, TokenAccount>>,
 
     //The user account as signer

@@ -400,7 +400,6 @@ export const Swap: FC = () => {
                 <div className="md:hero-content flex flex-col">
                     <h1>Pool Token 1: {poll.assets[0].toString()}</h1>
                     <span>Pool Balance: {poolBalance1.toString()}</span>
-                    <span>1 Token from this pool is equal to: {receiveAmount1.toString()} tokens from Token2 pool</span>
                     <span>Wallet PubKey: {ourWallet.publicKey.toString()}</span>
                     <button
                         className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
@@ -427,7 +426,6 @@ export const Swap: FC = () => {
 
                     <h1>Pool Token 2: {poll.assets[1].toString()}</h1>
                     <span>Pool Balance: {poolBalance2.toString()}</span>
-                    <span>1 Token from this pool is equal to: {receiveAmount2.toString()} tokens from Token1 pool</span>
                     <span>Wallet PubKey: {ourWallet.publicKey.toString()}</span>
                     <button
                         className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"

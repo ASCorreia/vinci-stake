@@ -17,11 +17,13 @@ pub struct Initialize<'info> {
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
+
 pub trait LiquidityPoolAccount<'info> {
     fn transfer_to_pool(&self, from: &Account<'info, TokenAccount>, to: &Account<'info, TokenAccount>, amount: u64, authority: &Signer<'info>, token_program: &Program<'info, Token>) -> Result<()>;
 
     fn transfer_from_pool(&self, from: &Account<'info, TokenAccount>, to: &Account<'info, TokenAccount>, amount: u64, token_program: &Program<'info, Token>) -> Result<()>;
 }
+
 impl<'info> LiquidityPoolAccount<'info> for Account<'info, VinciSwap> {
     fn transfer_to_pool(&self, from: &Account<'info, TokenAccount>, to: &Account<'info, TokenAccount>, amount: u64, authority: &Signer<'info>, token_program: &Program<'info, Token>) -> Result<()> {
         let cpi_program = token_program.to_account_info();

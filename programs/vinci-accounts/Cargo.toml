@@ -20,3 +20,4 @@ anchor-lang = "0.27.0"
 anchor-spl = "0.27.0"
 spl-token = "3.5.0"
 mpl-token-metadata = {version = "1.10.0", features = ["no-entrypoint"]}
+vinci-quiz = { path = "../vinci-quiz", features = ["cpi"]}

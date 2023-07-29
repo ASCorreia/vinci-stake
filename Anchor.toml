@@ -6,6 +6,7 @@ vinci_stake = "EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV"
 vinci_rewards = "4DszCYyUCeXYX3qRQoTdWscvXUyMkGmAm7KMrgLYX4FF"
 vinci_accounts = "38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ"
 vinci_swap = "GeXG8abTTediTsezVsBGBuxRWuZ15wK2UDd45dQ3vQKq"
+vinci_quiz = "5wvAnEqxro6JLFTkCTHtCnd4daWjPpEkDiK7HgrUEZcd"
 
 [registry]
 url = "https://api.apr.dev"
@@ -15,4 +16,8 @@ cluster = "devnet"
 wallet = "/home/ascespool/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/vinci-stake.ts"
+test-accounts = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/vinci-accounts.ts"
+test-stake = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/vinci-stake.ts"
+test-swap = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/vinci-swap.ts"
+test-quiz = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/vinci-quiz.ts"

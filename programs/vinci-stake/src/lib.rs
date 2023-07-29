@@ -126,9 +126,7 @@ pub mod vinci_stake {
         stake_entry.original_mint_seconds_struct.push(staking_time);
         /* ------------------------------------------------------------------------------------------------ */
 
-        stake_pool.total_staked += 1;
-
-        
+        stake_pool.total_staked += 1;       
 
         Ok(())
     }
@@ -258,7 +256,7 @@ pub mod vinci_stake {
         /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
 
-        //stake_pool.total_staked -= 1;
+        stake_pool.total_staked -= 1;
 
 
         Ok(())
@@ -274,12 +272,12 @@ pub mod vinci_stake {
         let original_mint = &mut ctx.accounts.original_mint;
 
         let user_token_accout = &mut ctx.accounts.from_mint_token_account;
-        let program_id = &mut ctx.accounts.token_program;
+        let _program_id = &mut ctx.accounts.token_program;
 
         let token_edition = &mut ctx.accounts.master_edition;
 
-        let delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
-        let signer = &mut ctx.accounts.user;
+        let _delegate = &mut ctx.accounts.to_mint_token_account; //to be replaced (or to receive) by / with the program address
+        let _signer = &mut ctx.accounts.user;
 
         let program_metadata_id = &mut ctx.accounts.token_metadata_program;
 
@@ -323,7 +321,7 @@ pub mod vinci_stake {
         /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
 
-        //stake_pool.total_staked -= 1;
+        stake_pool.total_staked -= 1;
 
         Ok(())
     }

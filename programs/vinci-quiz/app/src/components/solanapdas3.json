@@ -1,0 +1,169 @@
+{
+  "version": "0.1.0",
+  "name": "vinci_quiz",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addPlayer",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateScore",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "correct",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "upgrade",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeSeason",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "QuizSeason",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tournament",
+            "type": {
+              "vec": {
+                "defined": "UserEntry"
+              }
+            }
+          },
+          {
+            "name": "entries",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "UserEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "score",
+            "type": "u32"
+          },
+          {
+            "name": "level",
+            "type": "u8"
+          },
+          {
+            "name": "user",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "PlayerNotFound",
+      "msg": "Player not found"
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientPoints",
+      "msg": "Insufficient Points For Upgrade"
+    }
+  ],
+  "metadata": {
+    "address": "5wvAnEqxro6JLFTkCTHtCnd4daWjPpEkDiK7HgrUEZcd"
+  }
+}

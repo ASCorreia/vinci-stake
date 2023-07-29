@@ -8,4 +8,8 @@ pub enum CustomError {
     InsufficientBalanceSol,
     #[msg("Wrong Signer")]
     WrongSigner,
+    #[msg("Invalid Quiz PDA")]
+    WrongPDA,
+    #[msg("Invalid Quiz Bump")]
+    WrongBump,
 }

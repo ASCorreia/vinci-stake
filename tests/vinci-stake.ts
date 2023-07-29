@@ -4,8 +4,9 @@ import { VinciStake } from "../target/types/vinci_stake";
 import { VinciRewards } from "../target/types/vinci_rewards";
 import { VinciAccounts } from "../target/types/vinci_accounts";
 import { Metaplex, keypairIdentity, bundlrStorage, findNftsByOwnerOperation } from "@metaplex-foundation/js";
-import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount, createInitializeMintInstruction} from "@solana/spl-token";
+import {TOKEN_PROGRAM_ID, MINT_SIZE, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount, createInitializeMintInstruction, getOrCreateAssociatedTokenAccount} from "@solana/spl-token";
 
+import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 import { Connection, clusterApiUrl, ConfirmOptions, PublicKey, SystemProgram} from "@solana/web3.js"; //used to test the metaplex findByMint function
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { keypair } from "../wallet";
@@ -23,7 +24,7 @@ describe("vinci-stake", () => {
 
   /* --------------------------------- Derive the necessary PDAs ---------------------------------- */
   /* Derive a PDA for the vinci accounts program */
-  const [vinciWorldPDA, _bump] = PublicKey.findProgramAddressSync(
+  const [vinciWorldPDA, accountBump] = findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("VinciWorldAccount1"),
       key.wallet.publicKey.toBuffer(),
@@ -31,6 +32,7 @@ describe("vinci-stake", () => {
     accountsProgram.programId
   );
   console.log("Vinci World account: ", vinciWorldPDA.toBase58());
+  console.log("Vinci World account bump: ", accountBump);
 
   /* Derive a PDA for a Vinci Stake Pool */
   const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -85,24 +87,25 @@ describe("vinci-stake", () => {
     )[0];
   };
 
+  const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
+  const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+
   /* Let's test this :) */
-  it("Is initialized!", async () => {
-    /*const stakePoolTx = await program.methods.initializeStakePool().accounts({
+  /*it("Initialize Stake Pool", async () => {
+    const stakePoolTx = await program.methods.initializeStakePool().accounts({
       stakePool: vinciWorldStake,
       user: key.wallet.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId,
     }).rpc();
     console.log("Staking Pool address: ", vinciWorldStake);
     console.log("Staking Pool Initialized");
-    console.log("Your transaction signature", stakePoolTx);*/
+    console.log("Your transaction signature", stakePoolTx);
+  });*/
 
+  it("Stake, freeze and do stuff", async () => {
     /* -------------------------------------------------------------------------------- */
-
-    const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
     const masterEditionAcc = await getMasterEdition(mintAddress);
-
-    const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
 
     /* Metaplex findByMint and metaDataAccount Tests */
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -116,7 +119,9 @@ describe("vinci-stake", () => {
 
     /* --------------------------------------------------------------------------------- */
     const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    //const associatedTokenAccountFrom = await getOrCreateAssociatedTokenAccount(key.connection, payer, mintAddress, ownerAddress);
     const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
+    //const associatedTokenAccountTo = await getOrCreateAssociatedTokenAccount(key.connection, payer, mintAddress, key.wallet.publicKey);
 
     let receiverTokenAccount: any
     try {
@@ -131,7 +136,7 @@ describe("vinci-stake", () => {
       //Fires a list of instructions
       const mint_tx = new anchor.web3.Transaction().add(        
         //Creates the ATA account that is associated with our mint on our anchor wallet (key)
-        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountFrom, ownerAddress, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+        createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountTo, key.wallet.publicKey, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
       );
       console.log("Ata address: ", associatedTokenAccountTo.toString());
       console.log("Ata address: ", associatedTokenAccountFrom.toString());
@@ -153,10 +158,15 @@ describe("vinci-stake", () => {
     console.log("Stake Entry address: ", vinciWorldStake);
     console.log("Stake Entry created");
     console.log("Your transaction signature", stakeEntryTx);*/
-    //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
-    //Refer to https://github.com/metaplex-foundation/js#findByMint
+  });
+  //As metadataAddress matches the address for the metadata in the fetched NFT, this account shall be sent to the staking service
+  //Refer to https://github.com/metaplex-foundation/js#findByMint
+  
+  /*it("Stake Custodial", async () => {
+    const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
 
-    /*const stakeNFTtx = await program.methods.stake().accounts({
+    const stakeNFTtx = await program.methods.stake().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
 
@@ -168,9 +178,17 @@ describe("vinci-stake", () => {
 
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    console.log("NFT Stacked - Transaction ID", stakeNFTtx);*/
+    console.log("\n\nNFT Stacked - Transaction ID", stakeNFTtx);
+  });*/
 
-    /*const claimStakeTx = await program.methods.claimStake().accounts({
+  /*it("Claim Custodial", async () => {
+    const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
+    const masterEditionAcc = await getMasterEdition(mintAddress);
+
+    const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
+
+    const claimStakeTx = await program.methods.claimStake().accounts({
       user: key.wallet.publicKey,
 
       stakeEntry: vinciWorldStakeEntry,
@@ -185,14 +203,21 @@ describe("vinci-stake", () => {
 
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    console.log("Mint Claimed - Transaction ID: ", claimStakeTx);*/
+    console.log("\n\nMint Claimed - Transaction ID: ", claimStakeTx);
+  });*/
 
-    /*const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
+  /*it("Stake Non Custodial", async () => {
+    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
+    const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
+    const masterEditionAcc = await getMasterEdition(mintAddress);
+
+    const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
 
     let receiverTokenAccount2: any
     try {
       receiverTokenAccount2 = await getAccount(
-        connection,
+        key.connection,
         associatedTokenAccountNonCust,
         "confirmed",
         TOKEN_PROGRAM_ID
@@ -204,12 +229,12 @@ describe("vinci-stake", () => {
         //Creates the ATA account that is associated with our mint on our anchor wallet (key)
         createAssociatedTokenAccountInstruction(key.wallet.publicKey, associatedTokenAccountNonCust, vinciWorldStakeEntry, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
       );
-      console.log("Ata address: ", associatedTokenAccountNonCust.toString());
+      console.log("\n\nAta address: ", associatedTokenAccountNonCust.toString());
       const ataTx = await key.sendAndConfirm(mint_tx);
       console.log("Ata created: ", ataTx);
     }
     
-    const tokenAccountInfo = await connection.getParsedAccountInfo(associatedTokenAccountNonCust);
+    const tokenAccountInfo = await key.connection.getParsedAccountInfo(associatedTokenAccountNonCust);
     const tokenAccountData = tokenAccountInfo.value.data;
 
     console.log('The token account info is:', tokenAccountData);
@@ -230,14 +255,16 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);*/
+    console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
+  });*/
 
+  it("Update Stake Entry", async () => {
     const updateEntry = await program.methods.updateStake().accounts({
       stakePool: key.publicKey,
     }).remainingAccounts([
       {pubkey: vinciWorldStakeEntry, isSigner: false, isWritable: true}   
     ]).rpc();
-    console.log('Stake Entry Successfully updated - Transaction ID: ', updateEntry);
+    console.log('\n\nStake Entry Successfully updated - Transaction ID: ', updateEntry);
     const test = program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
       vinciAccount: vinciWorldPDA,
@@ -246,6 +273,9 @@ describe("vinci-stake", () => {
       rewardsProgram: rewardsProgram.programId,
     });
     console.log(test);
+  })
+
+  it("Claim Staking Rewards", async () => {
     const claimRewards = await program.methods.claimRewards().accounts({
       stakeEntry: vinciWorldStakeEntry,
       vinciAccount: vinciWorldPDA,
@@ -253,12 +283,22 @@ describe("vinci-stake", () => {
       accountsProgram: accountsProgram.programId,
       rewardsProgram: rewardsProgram.programId,
     }).rpc();
-    console.log('Rewards sucesfully claimed - Transaction ID: ', claimRewards);
+    console.log('\n\nRewards sucesfully claimed - Transaction ID: ', claimRewards);
 
     let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey 
     console.log("Total Ammount Of Tokens", fetchAccount.totalAmount.toString());
+  })
 
-    /*const claimNonCust = await program.methods.claimNonCustodial().accounts({
+  /*it("Claim Non Custodial Stake", async () => {
+    const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
+    const masterEditionAcc = await getMasterEdition(mintAddress);
+
+    const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
+    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, key.wallet.publicKey);
+
+    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
+
+    const claimNonCust = await program.methods.claimNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
@@ -274,44 +314,7 @@ describe("vinci-stake", () => {
         skipPreflight: true,
       }
     );
-    console.log('NFT sucessfully unfrozen - Transaction ID: ', claimNonCust);*/
-  });
-  /*it ("Quest simulation", async() => {
-    const tx = await accountsProgram.methods.startStuffOff().accounts({
-          baseAccount: vinciWorldPDA,
-          user: key.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        }).rpc(); //.signers[account] before rpc()
-
-    console.log("Vinci World PDA account created with Transaction", tx);
-
-    let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
-    
-    console.log("Total Ammount Of Tokens", fetchAccount.totalAmount.toString());
-    console.log("Owner of the account: ", fetchAccount.owner.toString());
-    console.log("Address of the provider: ", key.wallet.publicKey.toString());
-    assert.equal(fetchAccount.totalAmount.toString(), "0");
-
-    const addValue = await accountsProgram.methods.addAmmount(new anchor.BN(15)).accounts({
-        baseAccount: vinciWorldPDA,
-    }).rpc();
-    //can we pass more than one ammount and accounts?
-
-    let fetchAccount2 = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
-    console.log("Match won - 15 Tokens awarded");
-    console.log("Total Ammount Of Tokens", fetchAccount2.totalAmount.toString());
-    assert.equal(fetchAccount2.totalAmount.toString(), "15");
-
-    const tournamentPay = await accountsProgram.methods.payTournament(new anchor.BN(30)).accounts({
-        user: key.wallet.publicKey,
-    }).remainingAccounts([{pubkey: vinciWorldPDA, isSigner: false, isWritable: true}]).rpc();
-    console.log("Tournament transaction details: ", tournamentPay);
-    console.log("Signer wallet address (Provider): ", key.wallet.publicKey);
-
-    let fetchAccount3 = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
-    console.log("Tournament won - 30 Tokens awarded");
-    console.log("Total Ammount Of Tokens", fetchAccount3.totalAmount.toString());
-    assert.equal(fetchAccount3.totalAmount.toString(), "45");
+    console.log('\n\nNFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
   });*/
 });
 

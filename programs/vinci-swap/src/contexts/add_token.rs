@@ -1,5 +1,5 @@
 use anchor_lang::system_program;
-use anchor_spl::{token::Mint};
+use anchor_spl::token::Mint;
 
 use crate::*;
 //use crate::contexts::error::*;

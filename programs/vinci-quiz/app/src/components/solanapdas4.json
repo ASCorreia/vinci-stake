@@ -1,0 +1,452 @@
+{
+    "version": "0.1.0",
+    "name": "vinci_accounts",
+    "instructions": [
+      {
+        "name": "startStuffOff",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "mintToken",
+        "accounts": [
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "mint",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "ammount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "claimTokens",
+        "accounts": [
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "mint",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "payTournament",
+        "docs": [
+          "pay_tournament function will deserialize the provided remaining accounts in order to add the rewarded ammount to the appropriate account"
+        ],
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "ammount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "startTournament",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "tournament",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "prizePool",
+            "type": "u32"
+          }
+        ]
+      },
+      {
+        "name": "addTournamentParticipant",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": false,
+            "isSigner": true
+          },
+          {
+            "name": "tournamentList",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "newParticipant",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "addAmmount",
+        "accounts": [
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "owner",
+            "isMut": true,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "ammount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "burnToken",
+        "accounts": [
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "mint",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "ammount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "removeAmmount",
+        "accounts": [
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "owner",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "ammount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "mintNft",
+        "accounts": [
+          {
+            "name": "mintAuthority",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "mint",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "metadata",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenMetadataProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "rent",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "masterEdition",
+            "isMut": true,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "creatorKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "name": "seasonRewards",
+        "accounts": [
+          {
+            "name": "vinciQuiz",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "owner",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "quizProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "closeAccount",
+        "accounts": [
+          {
+            "name": "vinciAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "destination",
+            "isMut": true,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      }
+    ],
+    "accounts": [
+      {
+        "name": "BaseAccount",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "totalAmount",
+              "type": "u64"
+            },
+            {
+              "name": "owner",
+              "type": "publicKey"
+            },
+            {
+              "name": "bump",
+              "type": "u8"
+            },
+            {
+              "name": "spareStruct",
+              "type": {
+                "vec": {
+                  "defined": "ItemStruct"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Tournament",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "owner",
+              "type": "publicKey"
+            },
+            {
+              "name": "tournamentList",
+              "type": {
+                "vec": {
+                  "defined": "TournamentStruct"
+                }
+              }
+            },
+            {
+              "name": "prizePool",
+              "type": "u32"
+            }
+          ]
+        }
+      }
+    ],
+    "types": [
+      {
+        "name": "ItemStruct",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "ammount",
+              "type": "string"
+            },
+            {
+              "name": "userAddress",
+              "type": "publicKey"
+            }
+          ]
+        }
+      },
+      {
+        "name": "TournamentStruct",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "user",
+              "type": "publicKey"
+            },
+            {
+              "name": "score",
+              "type": "u32"
+            }
+          ]
+        }
+      }
+    ],
+    "errors": [
+      {
+        "code": 6000,
+        "name": "InsufficientBalanceSpl",
+        "msg": "Insufficient Balance - SPL"
+      },
+      {
+        "code": 6001,
+        "name": "InsufficientBalanceSol",
+        "msg": "Insufficient Balance - SOL"
+      },
+      {
+        "code": 6002,
+        "name": "WrongSigner",
+        "msg": "Wrong Signer"
+      },
+      {
+        "code": 6003,
+        "name": "WrongPDA",
+        "msg": "Invalid Quiz PDA"
+      },
+      {
+        "code": 6004,
+        "name": "WrongBump",
+        "msg": "Invalid Quiz Bump"
+      }
+    ],
+    "metadata": {
+      "address": "38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ"
+    }
+  }

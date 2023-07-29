@@ -26,6 +26,8 @@ pub mod vinci_accounts {
         msg!(&result.to_string());
         base_account.total_amount = 0;
         base_account.owner = pubkey;
+        base_account.level = 1;
+        ctx.accounts.base_account.bump = *ctx.bumps.get("base_account").unwrap();
 
         Ok(())
     }
@@ -276,6 +278,43 @@ pub mod vinci_accounts {
             master_edition_infos.as_slice(),
         )?;
         msg!("Master Edition Nft Minted !!!");
+        Ok(())
+    }
+
+    pub fn season_rewards(ctx: Context<SeasonRewards>) -> Result<()> {       
+        msg!("Vinci Quiz Key: {:?}", ctx.accounts.vinci_quiz.key().to_string());
+
+        let seeds = &[
+            "VinciQuiz".as_bytes(),
+        ];
+        let (pda, bump) = anchor_lang::prelude::Pubkey::find_program_address(seeds, &ctx.accounts.quiz_program.key());
+        msg!("Derived PDA is {:?} and bump is {:?}", pda.to_string(), bump);
+
+        require!((ctx.accounts.vinci_quiz.key() == pda), CustomError::WrongPDA);
+        require!(ctx.accounts.vinci_quiz.bump == bump, CustomError::WrongBump);
+
+        for account in ctx.remaining_accounts.iter() {
+
+            let account_key = account.key();
+            let mut data = account.try_borrow_mut_data()?;
+
+            //Deserialize the data from the account and save it in an Account variable
+            let mut account_to_write = BaseAccount::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
+
+            account_to_write.total_amount += 500;
+           
+            //Serialize the data back
+            account_to_write.try_serialize(&mut data.as_mut())?;
+
+            msg!("Account {:?} has been awarded 500 Vinci Points", account_key.to_string());
+        }
+        
+        Ok(())
+    }
+
+    pub fn close_account(ctx: Context<Close>) -> Result<()> {
+        let _ctx = ctx;
+        
         Ok(())
     }
 }

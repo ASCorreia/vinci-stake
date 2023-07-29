@@ -35,15 +35,16 @@ pub struct BurnToken<'info> {
 
 #[derive(Accounts)]
 pub struct AddAmount<'info> {
-    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump)]
+    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump = base_account.bump)] //bump issue with CPI from Vinci Rewards
     pub base_account: Account<'info, BaseAccount>,
+    ///CHECK: This is not dangerous
     #[account(mut)]
-    pub owner: Signer<'info>,
+    pub owner: AccountInfo<'info>, //Consider Signer
 }
 
 #[derive(Accounts)]
 pub struct RemoveAmmount<'info> {
-    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump)]
+    #[account(mut, seeds = [b"VinciWorldAccount1", owner.key().as_ref()], bump = base_account.bump)]
     pub base_account: Account<'info, BaseAccount>,
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -66,6 +67,8 @@ pub struct ClaimTokens<'info> {
 pub struct BaseAccount {
     pub total_amount: u64,
     pub owner: Pubkey,
+    pub bump: u8,
+    pub level: u8,
     pub spare_struct: Vec<ItemStruct>
 }
 
@@ -76,8 +79,6 @@ pub struct ItemStruct {
 }
 
 /* --------------- TBD -------------- */
-// Add Bump field to account and initialize it
-// Check the bump as a constraint in other contexts
+// Add Bump field to account and initialize it - Done
+// Check the bump as a constraint in other contexts - Done
 // Change 'owner' to 'authority'
-
-// Close all program accounts
