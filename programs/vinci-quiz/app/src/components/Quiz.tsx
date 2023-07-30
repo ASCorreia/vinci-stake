@@ -216,6 +216,7 @@ export const Quiz: FC = () => {
             const tx = await programQuiz.methods.updateScore(win).accounts({
                 vinciQuiz: vinciQuizPDA[0],
                 user: pubkey,
+                authority: anchProvider.wallet.publicKey,
             }).rpc();
             console.log("Vinci Quiz PDA: ", vinciQuizPDA[0].toString());
         }

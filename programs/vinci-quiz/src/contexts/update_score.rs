@@ -5,6 +5,7 @@ pub struct UpdateScore<'info> {
     #[account(mut, seeds = [b"VinciWorldQuiz"], bump = vinci_quiz.bump)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     pub user: SystemAccount<'info>,
+    pub authority: Signer<'info>,
 }
 
 impl<'info> UpdateScore<'info> {

@@ -30,6 +30,8 @@ pub mod vinci_quiz {
     }
 
     pub fn update_score(ctx: Context<UpdateScore>, correct: bool) -> Result<()> {
+        require!(ctx.accounts.authority.key() == Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap(), CustomError::InvalidAuthority);
+        
         match correct {
             true => ctx.accounts.update_score(30)?,
             false => {
