@@ -3,9 +3,10 @@ use crate::*;
 #[derive(Accounts)]
 pub struct CloseSeason<'info> {
     #[account(mut, close = destination)]
-    vinci_quiz: Account<'info, QuizSeason>,
+    pub vinci_quiz: Account<'info, QuizSeason>,
     #[account(mut)]
-    destination: SystemAccount<'info>,
+    pub destination: SystemAccount<'info>,
+    pub authority: Signer<'info>,
 }
 
 impl<'info> CloseSeason<'info> {

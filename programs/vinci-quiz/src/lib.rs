@@ -68,6 +68,8 @@ pub mod vinci_quiz {
     }
 
     pub fn close_season(ctx: Context<CloseSeason>) -> Result<()> {
+        require!(ctx.accounts.authority.key() == Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap(), CustomError::InvalidAuthority);
+        
         ctx.accounts.close_season()?;
 
         Ok(())
