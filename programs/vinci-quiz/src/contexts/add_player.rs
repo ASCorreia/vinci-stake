@@ -4,7 +4,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct AddPlayer<'info> {
-    #[account(mut, seeds = [b"VinciQuiz"], bump = vinci_quiz.bump)]
+    #[account(mut, seeds = [b"VinciWorldQuiz"], bump = vinci_quiz.bump)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -16,7 +16,7 @@ impl<'info> AddPlayer<'info> {
         
         match self.vinci_quiz.tournament.iter().find(|entry| entry.user == self.user.key()) {
             None => {
-                self.realloc(37, &self.user, &self.system_program)?;
+                self.realloc(46, &self.user, &self.system_program)?;
                 self.vinci_quiz.tournament.push(UserEntry{ score: 0, user: self.user.key(), level: 1, nft_minted: false });
                 self.vinci_quiz.entries += 1;
                 Ok(())

@@ -171,6 +171,77 @@
       ]
     },
     {
+      "name": "seasonRewards",
+      "accounts": [
+        {
+          "name": "vinciQuiz",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "fromAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "toAta1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "toAta2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "toAta3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user1",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "user2",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "user3",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "closeSeason",
       "accounts": [
         {
@@ -228,6 +299,10 @@
             "type": "u8"
           },
           {
+            "name": "nftMinted",
+            "type": "bool"
+          },
+          {
             "name": "user",
             "type": "publicKey"
           }
@@ -250,6 +325,16 @@
       "code": 6002,
       "name": "InsufficientLevel",
       "msg": "Insufficient Level for Mega Upgrade"
+    },
+    {
+      "code": 6003,
+      "name": "NftAlreadyMinted",
+      "msg": "NFT Already Minted"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidAuthority",
+      "msg": "Invalid Authority"
     }
   ],
   "metadata": {

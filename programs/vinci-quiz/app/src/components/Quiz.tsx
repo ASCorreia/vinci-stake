@@ -45,6 +45,8 @@ export const Quiz: FC = () => {
 
     const playerList: web3.AccountMeta[] = [];
 
+    const bSOL = new PublicKey("bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1");
+
     const [inputValueUpdate, setInputValueUpdate] = useState("");
     const onInputChangeUpdate = event => {
         const { value } = event.target;
@@ -52,7 +54,7 @@ export const Quiz: FC = () => {
       }
 
     const getProvider = () => {
-        const provider = new AnchorProvider(connection, ourWallet, AnchorProvider.defaultOptions())
+        let provider = new AnchorProvider(connection, ourWallet, AnchorProvider.defaultOptions());
         return provider;
     }
 
@@ -63,7 +65,7 @@ export const Quiz: FC = () => {
     const programAccounts = new Program(idl_object_accounts, accountsProgramID, anchProvider);
 
     //Derive a Vinci Quiz PDA
-    let vinciQuizPDA = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode("VinciQuiz")], programQuiz.programId);
+    let vinciQuizPDA = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode("VinciWorldQuiz")], programQuiz.programId);
 
     //Derive a Vinci Swap PDA
     const [vinciSwap, _] = PublicKey.findProgramAddressSync([
@@ -218,6 +220,7 @@ export const Quiz: FC = () => {
                 vinciQuiz: vinciQuizPDA[0],
                 user: pubkey,
             }).rpc();
+            console.log("Vinci Quiz PDA: ", vinciQuizPDA[0].toString());
         }
         catch(error) {
             console.log("Error while updating player score: ", error);
@@ -350,7 +353,43 @@ export const Quiz: FC = () => {
         } catch (error) {
           console.error("Error Minting NFT: ", error);
         }
-      }
+    }
+
+    const distributebSOLRewards = async() => {
+        try {
+            let fromATA = spl.getAssociatedTokenAddressSync(bSOL, vinciQuizPDA[0], true);
+            console.log("Vinci Quiz bSOL ATA: ", fromATA.toString())
+            let authority = anchProvider.wallet.publicKey;
+
+            let toATA1 = spl.getAssociatedTokenAddressSync(bSOL, anchProvider.wallet.publicKey);
+            let user1 = anchProvider.wallet.publicKey;
+            
+            let toATA2 = spl.getAssociatedTokenAddressSync(bSOL, anchProvider.wallet.publicKey);
+            let user2 = anchProvider.wallet.publicKey;
+            
+            let toATA3 = spl.getAssociatedTokenAddressSync(bSOL, anchProvider.wallet.publicKey);
+            let user3 = anchProvider.wallet.publicKey;
+
+            const tx = await programQuiz.methods.seasonRewards().accounts({
+                vinciQuiz: vinciQuizPDA[0],
+                mint: bSOL,
+                fromAta: fromATA,
+                toAta1: toATA1,
+                toAta2: toATA2,
+                toAta3: toATA3,
+                user1: user1,
+                user2: user2,
+                user3: user3,
+                authority: authority,
+                systemProgram: web3.SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+            }).rpc({skipPreflight: true});
+        } 
+        catch (error) {
+            console.log("Something went wrong while distributing bSOL rewards: ", error);
+        }
+    }
 
     const closeAccount = async (account: PublicKey) => {
         try {
@@ -548,7 +587,7 @@ export const Quiz: FC = () => {
                     </button>
                     <button
                         className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-                        onClick={distributeRewards} disabled={!ourWallet.publicKey}
+                        onClick={distributebSOLRewards} disabled={!ourWallet.publicKey}
                     >
                         <div className="hidden group-disabled:block ">
                         Wallet not connected

@@ -10,6 +10,8 @@ pub use contexts::*;
 #[program]
 pub mod vinci_quiz {
 
+    use anchor_spl::{token::{Transfer, transfer}, token_interface::{spl_token_2022::solana_zk_token_sdk::zk_token_proof_instruction::transfer}};
+
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
@@ -44,8 +46,6 @@ pub mod vinci_quiz {
 
         ctx.accounts.vinci_quiz.order_entries()?;
 
-        msg!("Player score has been updated with 30 points more");
-
         Ok(())
     }
 
@@ -63,10 +63,8 @@ pub mod vinci_quiz {
 
     pub fn season_rewards(ctx: Context<SeasonRewards>) -> Result<()> {
         require!(ctx.accounts.authority.key() == Pubkey::from_str("6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ").unwrap(), CustomError::InvalidAuthority);
-
-        for account in ctx.remaining_accounts.iter() {
-            
-        }
+        
+        ctx.accounts.distribute_rewards()?;
 
         Ok(())
     }

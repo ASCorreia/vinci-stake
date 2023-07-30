@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct UpdateScore<'info> {
-    #[account(mut, seeds = [b"VinciQuiz"], bump = vinci_quiz.bump)]
+    #[account(mut, seeds = [b"VinciWorldQuiz"], bump = vinci_quiz.bump)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     pub user: SystemAccount<'info>,
 }
@@ -15,9 +15,15 @@ impl<'info> UpdateScore<'info> {
         let player_entry = tournament.iter_mut().find(|player_entry| player_entry.user == self.user.key()).unwrap();
 
         match score {
-            30..=u32::MAX => player_entry.score += score,
+            30..=u32::MAX => {
+                player_entry.score += score;
+                msg!("Player score has been updated with 30 points more");
+            }
             _ => match player_entry.score {
-                20..=u32::MAX => player_entry.score -= score,
+                20..=u32::MAX => {
+                    player_entry.score -= score;
+                    msg!("Player score has been updated with less {:?} points", score);
+                }
                 _ => return Ok(()),
             }
         }

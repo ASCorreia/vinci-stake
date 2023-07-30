@@ -21,7 +21,7 @@ impl<'info> QuizFuncs<'info> for Account<'info, QuizSeason> {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, seeds = [b"VinciQuiz"], bump, payer = user, space = 8 + (4 + 45) + 4 + 1)]
+    #[account(init, seeds = [b"VinciWorldQuiz"], bump, payer = user, space = 8 + (4 + 46) + 4 + 1)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     #[account(mut)]
     pub user: Signer<'info>,

@@ -6,7 +6,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct Upgrade<'info> {
-    #[account(mut, seeds = [b"VinciQuiz"], bump = vinci_quiz.bump)]
+    #[account(mut, seeds = [b"VinciWorldQuiz"], bump = vinci_quiz.bump)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     pub user: SystemAccount<'info>,
     pub authority: Signer<'info>,
@@ -14,7 +14,7 @@ pub struct Upgrade<'info> {
 
 #[derive(Accounts)]
 pub struct MegaUpgrade<'info> {
-    #[account(mut, seeds = [b"VinciQuiz"], bump = vinci_quiz.bump)]
+    #[account(mut, seeds = [b"VinciWorldQuiz"], bump = vinci_quiz.bump)]
     pub vinci_quiz: Account<'info, QuizSeason>,
     pub user: SystemAccount<'info>,
     pub authority: Signer<'info>,
@@ -71,7 +71,7 @@ impl<'info> MegaUpgrade<'info> {
 
         let player = self.vinci_quiz.tournament.iter_mut().find(|entry| entry.user == self.user.key()).unwrap();
 
-        require!(player.level == 10, CustomError::InsufficientLevel);
+        require!(player.level >= 3, CustomError::InsufficientLevel);
 
         require!(player.nft_minted == false, CustomError::NftAlreadyMinted);
 

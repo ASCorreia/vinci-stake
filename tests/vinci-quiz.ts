@@ -15,7 +15,7 @@ describe("vinci-quiz", () => {
   const keypair = Keypair.generate();
   const keypair2 = Keypair.generate();
 
-  let vinciQuizPDA = findProgramAddressSync([anchor.utils.bytes.utf8.encode("VinciQuiz")], program.programId);
+  let vinciQuizPDA = findProgramAddressSync([anchor.utils.bytes.utf8.encode("VinciWorldQuiz")], program.programId);
   console.log("\n\nVinci Quiz account: ", vinciQuizPDA[0].toBase58());
   console.log("Vinci Quiz account bump: ", vinciQuizPDA[1]);
 
@@ -90,21 +90,21 @@ describe("vinci-quiz", () => {
   it("Update player score", async () => {
     console.log("\n\nUpdating Player Score\n");
 
-    const tx = await program.methods.updateScore().accounts({
+    const tx = await program.methods.updateScore(true).accounts({
       vinciQuiz: vinciQuizPDA[0],
       user: keypair.publicKey,
     }).rpc();
 
     console.log("Player 1 score updated - TxID: ", tx, "\n");
 
-    const tx2 = await program.methods.updateScore().accounts({
+    const tx2 = await program.methods.updateScore(true).accounts({
       vinciQuiz: vinciQuizPDA[0],
       user: keypair2.publicKey,
     }).rpc();
 
     console.log("Player 2 score updated - TxID: ", tx2, "\n");
 
-    const tx3 = await program.methods.updateScore().accounts({
+    const tx3 = await program.methods.updateScore(false).accounts({
       vinciQuiz: vinciQuizPDA[0],
       user: keypair2.publicKey,
     }).rpc();
