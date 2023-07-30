@@ -10,8 +10,6 @@ pub use contexts::*;
 #[program]
 pub mod vinci_quiz {
 
-    use anchor_spl::{token::{Transfer, transfer}, token_interface::{spl_token_2022::solana_zk_token_sdk::zk_token_proof_instruction::transfer}};
-
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
