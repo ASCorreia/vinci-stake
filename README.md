@@ -35,6 +35,11 @@ All this client / program interaction will be done through our Vinci dApp ([http
     - The answer backend method will store the user answer off and on-chain
 - The Leaderboard is fetched from our on-chain program
 
+## Quick game walkthrough
+
+A quick game walkthrough can be found here [https://www.youtube.com/watch?v=tcni-8_ceF8](https://www.youtube.com/watch?v=tcni-8_ceF8).
+The rewards button, which will distribute bSOL, will not be available (only in the video) as it will be called daily and does not allow interaction with the user.
+
 
 ## Other Vinci World Programs (Out of Speedrun scope)
 
