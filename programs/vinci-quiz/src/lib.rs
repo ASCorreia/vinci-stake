@@ -27,8 +27,6 @@ pub mod vinci_quiz {
     pub fn add_player(ctx: Context<AddPlayer>) -> Result<()> {
         ctx.accounts.add_player()?;
         ctx.accounts.vinci_quiz.order_entries()?;
-        
-        msg!("Player Succesfully added to Vinci Quiz Season");
 
         Ok(())
     }

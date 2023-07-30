@@ -54,8 +54,11 @@ impl<'info> Upgrade<'info> {
         require!(player.score >= 30, CustomError::InsufficientPoints);
 
         match player.level {
-            u8::MIN..=9 => player.level += 1,
-            _ => return Ok(()),
+            u8::MIN..=2 => player.level += 1,
+            _ => {
+                msg!("Player reached maximum level");
+                return Ok(());
+            }
         }
         msg!("Player level has been !!!UPGRADED!!! to level {:?}", player.level);
 

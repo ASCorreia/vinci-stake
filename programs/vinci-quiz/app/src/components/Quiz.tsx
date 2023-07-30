@@ -75,9 +75,6 @@ export const Quiz: FC = () => {
     const mint1 = new PublicKey("8LbiacZvDREPUa5a7Ljth16G9p1BoKXccqs5cMcjuhfu");
     const mint2 = new PublicKey("E7sRawws3T77FLf5P7u5W1gBA9ex2H6TfFCxKQJA2TYA");
 
-    //Define a mint keypair
-    let NFTmintKey = web3.Keypair.generate();
-
     const TOKEN_METADATA_PROGRAM_ID = new web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
     const getMetadata = (mint: PublicKey) => {
         return (
@@ -289,6 +286,9 @@ export const Quiz: FC = () => {
     }
 
     const megaUpgrade = async (user: PublicKey) => {
+        //Define a mint keypair
+        let NFTmintKey = web3.Keypair.generate();
+        
         try {
           //const key = key.wallet.publicKey;
           const lamports = await program.provider.connection.getMinimumBalanceForRentExemption(MINT_SIZE);

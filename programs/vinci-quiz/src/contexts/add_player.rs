@@ -19,9 +19,13 @@ impl<'info> AddPlayer<'info> {
                 self.realloc(46, &self.user, &self.system_program)?;
                 self.vinci_quiz.tournament.push(UserEntry{ score: 0, user: self.user.key(), level: 1, nft_minted: false });
                 self.vinci_quiz.entries += 1;
+                msg!("Player Succesfully added to Vinci Quiz Season");
                 Ok(())
             }
-            Some(_) => Ok(())
+            Some(_) => {
+                msg!("Player already registered to Vinci Quiz Season");
+                Ok(())
+            }
         }
     }
 
