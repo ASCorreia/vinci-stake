@@ -62,7 +62,7 @@ pub mod vinci_quiz {
     }
 
     pub fn season_rewards(ctx: Context<SeasonRewards>) -> Result<()> {
-        require!(ctx.accounts.authority.key() == Pubkey::from_str("6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ").unwrap(), CustomError::InvalidAuthority);
+        require!(ctx.accounts.authority.key() == Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap(), CustomError::InvalidAuthority);
         
         ctx.accounts.distribute_rewards()?;
 
