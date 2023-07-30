@@ -28,7 +28,12 @@ The program will receive request from the client (Create Quiz, Add user to Quiz,
 - Upon reaching max level (3 for the hackhaton), the player can continue to play to increase his score. The program will receive a daily request to distribute 0.4 bSOL from the program vault to the top3 players.
 
 All this client / program interaction will be done through our Vinci dApp ([https://github.com/VinciWorld/vinci-dapp](https://github.com/VinciWorld/vinci-dapp)).
-- TBD by Pedro
+- The user can login with the available social oAuth providers (Discord, Twitter and Twitch)
+- After logging in, the user will be redirected to the Quiz Page, specially made for this hackathon
+- After connecting his wallet, the user can start playing the Quiz
+    - Quiz Questions are stored in our database
+    - The answer backend method will store the user answer off and on-chain
+- The Leaderboard is fetched from our on-chain program
 
 
 ## Other Vinci World Programs (Out of Speedrun scope)
