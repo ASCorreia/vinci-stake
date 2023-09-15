@@ -1,6 +1,6 @@
 use anchor_spl::token::{Token, MintTo, self};
 use solana_program::program::invoke;
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3, verify_collection};
 
 use crate::*;
 
