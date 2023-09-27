@@ -1,5 +1,3 @@
-use vinci_accounts::{BaseAccount, program::VinciAccounts};
-
 use crate::*;
 
 #[derive(Accounts)]
@@ -24,17 +22,47 @@ pub struct InitializeStakeEntry<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[derive(Accounts)]
-pub struct ClaimRewards<'info> {
-    #[account(mut)]
-    pub stake_entry: Box<Account<'info, StakeEntry>>,
-    #[account(mut)]
-    pub vinci_account: Box<Account<'info, BaseAccount>>,
-    #[account(mut)]
-    pub owner: Signer<'info>,
+impl<'info> InitializeStakeEntry<'info> {
+    pub fn initialize(&mut self) -> Result<()> {
+        
+        self.stake_entry.original_mint = self.original_mint.key();
+        self.stake_entry.pool = self.stake_pool_account.key();
+        self.stake_entry.amount = 0; //Probably not needed
+        self.stake_entry.original_mint_claimed = Vec::new();
+        self.stake_entry.stake_mint_claimed = Vec::new();
+        self.stake_entry.original_mint_seconds_struct = Vec::new();
+        self.stake_entry.original_owner = self.user.key();
 
-    pub accounts_program: Program<'info, VinciAccounts>,
-    pub rewards_program: Program<'info, VinciRewards>,
+        // All the checks below shouls be moved to the stake function? Since we are allowing multiple stakes per user
+        // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
+        assert_derivation(
+            &mpl_token_metadata::id(),
+            &self.original_mint_metadata.to_account_info(),
+            &[
+                mpl_token_metadata::state::PREFIX.as_bytes(),
+                mpl_token_metadata::id().as_ref(),
+                self.original_mint.key().as_ref(),
+            ],
+        )?;
+
+        require!(self.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);
+
+        /* Borrow and deserialize the metada account from the original mint metadata */
+        let mint_metadata_data = self.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
+        require!(self.original_mint_metadata.to_account_info().owner.key() == mpl_token_metadata::id(), CustomError::InvalidMintOwner); //Checks that the owner is the Metadadata program
+        let original_mint_metadata = Metadata::deserialize(&mut mint_metadata_data.as_ref()).expect("Error deserializng metadata");
+        require!(original_mint_metadata.mint == self.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored in the account are the same
+
+        //Get the creators from the metadata and see if the it contains the ones required by the stake pool
+        let creators = original_mint_metadata.data.creators.unwrap();
+        //let collection = original_mint_metadata.collection.unwrap();
+        let find_creators = creators.iter().find(|creator| self.stake_pool_account.requires_creators.contains(&creator.address) && !creator.verified); // (!)creator.verified
+
+        //Checks that the creators have been found
+        require!(find_creators.is_some() == true, CustomError::MissingCreators);
+        
+        Ok(())
+    }
 }
 
 #[account]

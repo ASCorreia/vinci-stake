@@ -9,6 +9,22 @@ pub struct InitializeStakePool<'info> {
     pub system_program: Program<'info, System>,
 }
 
+impl<'info> InitializeStakePool<'info> {
+    pub fn intialize(&mut self) -> Result<()> {
+
+        self.stake_pool.double_or_reset_enabled = None;
+        self.stake_pool.cooldown_seconds = None;
+        self.stake_pool.identifier = 0xBEBACAFE;
+        self.stake_pool.requires_authorization = false;
+        self.stake_pool.requires_creators.push(Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap());
+        self.stake_pool.max_stake_amount = None;
+        self.stake_pool.total_staked = 0;
+        
+        Ok(())
+    }
+}
+
+//Update this struct by removing unnecessary fields
 #[account]
 pub struct StakePool {
     pub identifier: u64,
