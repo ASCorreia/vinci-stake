@@ -1,10 +1,10 @@
 use crate::*;
-use anchor_spl::{token::{Token, TokenAccount}, associated_token::get_associated_token_address};
+use anchor_spl::token::{Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct StakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
-    #[account(mut, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
+    #[account(mut, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
     pub stake_pool: Box<Account<'info, StakePool>>,
@@ -52,8 +52,8 @@ impl<'info> StakeCtx<'info> {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
-        self.stake_entry.original_owner = self.from_mint_token_account.key();
-        self.stake_entry.staking_owner = self.to_mint_token_account.key();
+        //self.stake_entry.original_owner = self.from_mint_token_account.key(); -> Probably not needed
+        //self.stake_entry.staking_owner = self.to_mint_token_account.key(); -> Probably not needed
 
         //Set the last staked time
         self.stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
@@ -74,6 +74,7 @@ impl<'info> StakeCtx<'info> {
         /* ------------------------------------------------------------------------------------------------ */
 
         self.stake_pool.total_staked += 1;
+        self.stake_entry.amount += 1;
         
         Ok(())
     }
@@ -144,8 +145,9 @@ impl<'info> StakeCtx<'info> {
         Either use invoke_signed or try to use the program itself as delegation authority
         Try creating a PDA with a predefined seed (PDA_WORD for instance) and sign with that account (Create a dedicated PDA for this purpose))
         */
-        stake_entry.original_owner = user_token_accout.key();
-        stake_entry.staking_owner = stake_entry.key();
+        
+        //stake_entry.original_owner = user_token_accout.key(); -> Probably not needed
+        //stake_entry.staking_owner = stake_entry.key(); -> Probably not needed
 
         //Set the last staked time
         stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
@@ -165,6 +167,7 @@ impl<'info> StakeCtx<'info> {
         /* ------------------------------------------------------------------------------------------------ */
 
         stake_pool.total_staked += 1;
+        stake_entry.amount += 1;
 
         Ok(())
     }

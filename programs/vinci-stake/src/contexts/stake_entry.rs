@@ -31,7 +31,7 @@ impl<'info> InitializeStakeEntry<'info> {
         self.stake_entry.original_mint_claimed = Vec::new();
         self.stake_entry.stake_mint_claimed = Vec::new();
         self.stake_entry.original_mint_seconds_struct = Vec::new();
-        self.stake_entry.original_owner = self.user.key();
+        //self.stake_entry.original_owner = self.user.key();
 
         // All the checks below shouls be moved to the stake function? Since we are allowing multiple stakes per user
         // assert metadata account derivation (asserts from a programID, an account and a path (seeds))
@@ -71,16 +71,17 @@ pub struct StakeEntry {
     pub amount: u64,
     pub original_mint: Pubkey,
     pub original_mint_claimed: Vec<Pubkey>, //bool,
-    pub last_staker: Pubkey, //To be remved as is not being used?
+    //pub last_staker: Pubkey, //To be removed as is not being used?
     pub last_staked_at: i64, //Needed?? Can the last_updated_at be used for this?
     pub total_stake_seconds: u128,
     pub stake_mint_claimed: Vec<Pubkey>, //bool,
     pub original_mint_seconds_struct: Vec<StakeTime>, //To be discussed as an approach to store mint time (if only one stake entry is used per user)
     pub stake_mint: Option<Pubkey>,
-    pub cooldown_start_seconds: Option<i64>, //To be remved as is not being used?
+    pub cooldown_start_seconds: Option<i64>, //To be removed as is not being used? Or leave it as provision?
     pub last_updated_at: Option<i64>,
-    pub original_owner: Pubkey,
-    pub staking_owner: Pubkey,
+    //pub original_owner: Pubkey, -> Probably not needed
+    //pub staking_owner: Pubkey, -> Probably not needed
+    pub bump: u8,
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]

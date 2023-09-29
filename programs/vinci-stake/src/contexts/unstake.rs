@@ -53,7 +53,7 @@ impl<'info> UnstakeCtx<'info> {
         //require!(stake_entry.stake_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == None, CustomError::MintAlreadyClaimed);
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
-        //Transfer NFT
+        //Transfer NFT -> To be updated, needs to transfered in and out of a PDA
         let cpi_accounts = token::Transfer{
             from: from_token_account.to_account_info(),
             to: to_token_account.to_account_info(),
@@ -71,6 +71,7 @@ impl<'info> UnstakeCtx<'info> {
         stake_entry.total_stake_seconds = 0;
 
         stake_pool.total_staked -= 1;
+        stake_entry.amount -= 1;
 
 
         Ok(())
@@ -91,7 +92,7 @@ impl<'info> UnstakeCtx<'info> {
         let token_edition = &mut self.master_edition;
 
         let _delegate = &mut self.to_mint_token_account; //to be replaced (or to receive) by / with the program address
-        let _signer = &mut self.user;
+        let _signer = &mut self.user; //To be deleted as we just need to check that he signed the transaction 
 
         let program_metadata_id = &mut self.token_metadata_program;
 
@@ -136,6 +137,7 @@ impl<'info> UnstakeCtx<'info> {
         stake_entry.total_stake_seconds = 0;
 
         stake_pool.total_staked -= 1;
+        stake_entry.amount -= 1;
 
         Ok(())
     }

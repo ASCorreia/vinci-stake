@@ -34,7 +34,9 @@ pub mod vinci_stake {
     }
 
     pub fn initialize_stake_entry(ctx: Context<InitializeStakeEntry>) -> Result<()> {
-        ctx.accounts.initialize()?; 
+        ctx.accounts.initialize()?;
+        
+        ctx.accounts.stake_entry.bump = *ctx.bumps.get("stake_entry").unwrap();
 
         Ok(())
     }
@@ -63,7 +65,7 @@ pub mod vinci_stake {
         Ok(())
     }
 
-    pub fn update_stake(ctx: Context<UpdateStakeCtx>) -> Result<()> {
+    pub fn update_stake(ctx: Context<UpdateStakeCtx>) -> Result<()> { //Does this needs to use remaining accounts???
         //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
@@ -96,6 +98,18 @@ pub mod vinci_stake {
 
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         ctx.accounts.claim_rewards()?;
+
+        Ok(())
+    }
+
+    pub fn close_stake_entry(ctx: Context<CloseEntry>) -> Result<()> {
+        ctx.accounts.close_stake_entry()?;
+
+        Ok(())
+    }
+
+    pub fn close_stake_pool(ctx: Context<ClosePool>) -> Result<()> {
+        ctx.accounts.close_stake_pool()?;
 
         Ok(())
     }
