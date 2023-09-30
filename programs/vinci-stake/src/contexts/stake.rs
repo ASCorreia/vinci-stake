@@ -28,10 +28,6 @@ pub struct StakeCtx<'info>{
     pub token_program: Program<'info, Token>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(mut)]
-    pub test: AccountInfo<'info>,
-
-    /// CHECK: This is not dangerous because we don't read or write from this account
     pub token_metadata_program: AccountInfo<'info>,
 }
 
@@ -80,7 +76,6 @@ impl<'info> StakeCtx<'info> {
     }
 
     pub fn stake_non_custodial(&mut self) -> Result<()> {
-        let pda = &mut self.test;
         let stake_pool = &mut self.stake_pool;
         let stake_entry = &mut self.stake_entry;
 
@@ -114,13 +109,13 @@ impl<'info> StakeCtx<'info> {
         token::approve(cpi_context, 1)?;
 
         // Define the seeds
-        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", pda.key().as_ref()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", authority.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
         msg!("Derived PDA Bump: {}", pda_bump);
 
         let seeds = &[
             "VinciWorldStakeEntry_28".as_bytes(),
-            &pda.key().clone().to_bytes(),
+            &authority.key().clone().to_bytes(),
             &[pda_bump]
         ];
 

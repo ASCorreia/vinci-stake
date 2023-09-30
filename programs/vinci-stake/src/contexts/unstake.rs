@@ -4,7 +4,7 @@ use anchor_spl::token::{Token, TokenAccount};
 #[derive(Accounts)]
 pub struct UnstakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
-    #[account(mut, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
+    #[account(mut, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
     pub stake_pool: Box<Account<'info, StakePool>>,

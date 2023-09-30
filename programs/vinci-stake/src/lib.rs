@@ -70,7 +70,7 @@ pub mod vinci_stake {
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
         //Iterate through all the remaining accounts array
-        for account in ctx.remaining_accounts.iter() {
+        /*for account in ctx.remaining_accounts.iter() {
             let mut stake_entry_data = account.try_borrow_mut_data()?;
 
             //Deserialize the data into a stake entry
@@ -91,7 +91,9 @@ pub mod vinci_stake {
 
             //Serialize the data back
             stake_entry.try_serialize(&mut stake_entry_data.as_mut())?;
-        }
+        }*/
+
+        ctx.accounts.update_stake()?;
 
         Ok(())
     }

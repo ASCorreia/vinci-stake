@@ -89,9 +89,10 @@ describe("vinci-stake", () => {
   
   /* Create a PDA to receive to be used as seed to receive NFTs */
   const receivePDA = findProgramAddressSync([anchor.utils.bytes.utf8.encode("vault")], program.programId);
+  console.log("\nVault address: ", receivePDA[0], "\n");
 
   const mintAddress = new anchor.web3.PublicKey("EK6fYHzcwfnvBj3Tfv54aWjLpg7LJzKzGbGkd8snMLbb"); //used for testing purposes only
-  const ownerAddress = new anchor.web3.PublicKey("25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR");  //AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C
+  const ownerAddress = new anchor.web3.PublicKey("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C");  //25wServiqrh2T7tXK9HrWb6KkhBegLXmPRtyQtWENnrR
 
   /* Let's test this :) */
   it("Initialize Stake Pool", async () => {
@@ -141,7 +142,7 @@ describe("vinci-stake", () => {
       //Fires a list of instructions
       const mint_tx = new anchor.web3.Transaction().add(        
         //Creates the ATA account that is associated with our mint on our anchor wallet (key)
-        createAssociatedTokenAccountInstruction(provider.wallet.publicKey, associatedTokenAccountTo, provider.wallet.publicKey, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+        createAssociatedTokenAccountInstruction(provider.wallet.publicKey, associatedTokenAccountTo, receivePDA[0], mintAddress),
       );
       console.log("Ata address: ", associatedTokenAccountTo.toString());
       console.log("Ata address: ", associatedTokenAccountFrom.toString());
@@ -149,6 +150,7 @@ describe("vinci-stake", () => {
       console.log("Ata created: ", ataTx);
     } 
 
+    console.log("Initializing stake entry");
     const stakeEntryTx = await program.methods.initializeStakeEntry().accounts({
       user: provider.wallet.publicKey,
 
@@ -159,7 +161,7 @@ describe("vinci-stake", () => {
       originalMintMetadata: metadataAddress,
 
       systemProgram: anchor.web3.SystemProgram.programId,
-    }).rpc();
+    }).rpc({skipPreflight: true});
     console.log("Stake Entry address: ", vinciWorldStake.toBase58());
     console.log("Stake Entry created");
     console.log("Your transaction signature", stakeEntryTx);
@@ -244,31 +246,27 @@ describe("vinci-stake", () => {
 
     console.log('\n\nThe token account info is:', tokenAccountData);
 
-    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
+    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({ //test variable is not necessary as the user will be the address used to compiute the pda
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
       fromMintTokenAccount: associatedTokenAccountFrom,
       toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
-      user: keypair.publicKey, //key.wallet.publicKey,
+      user: provider.publicKey, //keypair.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
-      test: provider.wallet.publicKey,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-    }).signers([keypair]).rpc(
-      {
-        skipPreflight: true,
-      }
-    );
+    }).rpc({skipPreflight: true});
     console.log('NFT sucessfully frozen - Transaction ID: ', stakeNonCust);
   });
 
   it("Update Stake Entry", async () => {
     const updateEntry = await program.methods.updateStake().accounts({
+      stakeEntry: vinciWorldStakeEntry,
       stakePool: provider.publicKey,
-    }).remainingAccounts([
+    })/*.remainingAccounts([
       {pubkey: vinciWorldStakeEntry, isSigner: false, isWritable: true}   
-    ]).rpc();
+    ])*/.rpc();
     console.log('\n\nStake Entry Successfully updated - Transaction ID: ', updateEntry);
   })
 
@@ -279,7 +277,7 @@ describe("vinci-stake", () => {
       owner: provider.wallet.publicKey,
       accountsProgram: accountsProgram.programId,
       rewardsProgram: rewardsProgram.programId,
-    }).rpc();
+    }).rpc({skipPreflight: true});
     console.log('\n\nRewards sucesfully claimed - Transaction ID: ', claimRewards);
 
     let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey 
