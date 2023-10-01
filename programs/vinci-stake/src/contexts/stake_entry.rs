@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct InitializeStakeEntry<'info> {
-    #[account(init, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump, payer = user, space = 3500)] //stake_pool_account.key().as_ref()
+    #[account(init, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump, payer = user, space = 3500)] //stake_pool_account.key().as_ref()
     pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
     pub stake_pool_account: Box<Account<'info, StakePool>>,
@@ -28,9 +28,10 @@ impl<'info> InitializeStakeEntry<'info> {
         self.stake_entry.original_mint = self.original_mint.key();
         self.stake_entry.pool = self.stake_pool_account.key();
         self.stake_entry.amount = 0; //Probably not needed
-        self.stake_entry.original_mint_claimed = Vec::new();
-        self.stake_entry.stake_mint_claimed = Vec::new();
+        //self.stake_entry.original_mint_claimed = Vec::new();
+        //self.stake_entry.stake_mint_claimed = Vec::new();
         self.stake_entry.original_mint_seconds_struct = Vec::new();
+        self.stake_entry.cooldown_start_seconds = None;
         //self.stake_entry.original_owner = self.user.key();
 
         // All the checks below shouls be moved to the stake function? Since we are allowing multiple stakes per user
@@ -70,11 +71,11 @@ pub struct StakeEntry {
     pub pool: Pubkey,
     pub amount: u64,
     pub original_mint: Pubkey,
-    pub original_mint_claimed: Vec<Pubkey>, //bool,
+    //pub original_mint_claimed: Vec<Pubkey>, //bool,
     //pub last_staker: Pubkey, //To be removed as is not being used?
     pub last_staked_at: i64, //Needed?? Can the last_updated_at be used for this?
     pub total_stake_seconds: u128,
-    pub stake_mint_claimed: Vec<Pubkey>, //bool,
+    //pub stake_mint_claimed: Vec<Pubkey>, //bool,
     pub original_mint_seconds_struct: Vec<StakeTime>, //To be discussed as an approach to store mint time (if only one stake entry is used per user)
     pub stake_mint: Option<Pubkey>,
     pub cooldown_start_seconds: Option<i64>, //To be removed as is not being used? Or leave it as provision?

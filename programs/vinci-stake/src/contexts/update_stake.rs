@@ -2,7 +2,7 @@ use crate::*;
 
 #[derive(Accounts)]
 pub struct UpdateStakeCtx<'info>{
-    #[account(mut, seeds = [b"VinciWorldStakeEntry_28", stake_pool.key().as_ref()], bump = stake_entry.bump)]
+    #[account(mut, seeds = [b"VinciStakeEntry", stake_pool.key().as_ref()], bump = stake_entry.bump)]
     pub stake_entry: Account<'info, StakeEntry>,
     pub stake_pool: Signer<'info>,
 }

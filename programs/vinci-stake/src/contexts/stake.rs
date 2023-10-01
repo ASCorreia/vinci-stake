@@ -4,7 +4,7 @@ use anchor_spl::token::{Token, TokenAccount};
 #[derive(Accounts)]
 pub struct StakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
-    #[account(mut, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
+    #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
     pub stake_pool: Box<Account<'info, StakePool>>,
@@ -62,7 +62,7 @@ impl<'info> StakeCtx<'info> {
         );
 
         //Flag that the original mint has been claimed by the pool
-        self.stake_entry.original_mint_claimed.push(original_mint);
+        //self.stake_entry.original_mint_claimed.push(original_mint);
 
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         let staking_time = StakeTime{time: self.stake_entry.total_stake_seconds, mint: original_mint};
@@ -109,12 +109,12 @@ impl<'info> StakeCtx<'info> {
         token::approve(cpi_context, 1)?;
 
         // Define the seeds
-        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", authority.key().as_ref()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciStakeEntry", authority.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
         msg!("Derived PDA Bump: {}", pda_bump);
 
         let seeds = &[
-            "VinciWorldStakeEntry_28".as_bytes(),
+            "VinciStakeEntry".as_bytes(),
             &authority.key().clone().to_bytes(),
             &[pda_bump]
         ];
@@ -133,7 +133,7 @@ impl<'info> StakeCtx<'info> {
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[seeds], //&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
+            &[seeds], //&[&[b"VinciStakeEntry", pda.key().as_ref(), &[pda_bump]]],
         )?;
 
         /*TBD:
@@ -154,7 +154,7 @@ impl<'info> StakeCtx<'info> {
         );
 
         //Flag that the original mint has been claimed by the pool
-        stake_entry.original_mint_claimed.push(original_mint.key());
+        //stake_entry.original_mint_claimed.push(original_mint.key());
 
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         let staking_time = StakeTime{time: stake_entry.total_stake_seconds, mint: original_mint.key()};

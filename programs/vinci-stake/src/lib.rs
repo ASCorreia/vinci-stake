@@ -13,8 +13,6 @@ use anchor_spl::token::{self};
 use vinci_rewards::program::VinciRewards;
 
 declare_id!("EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV");
-//HcacNu7JNEtksDekoeHGxdCNGasLtcktayEJbssz2W92
-//Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
 
 pub mod contexts;
 pub mod error;
@@ -125,7 +123,7 @@ pub mod vinci_stake {
         and then be used (in another context (maybe stake ctx) to store the initial time, do additional validation and transfer the token). - Done
         Note: Both the original mint account and the final destination shall be know (as the program needs to know every account to read / write beforehand)In progress (Refer to 1. and 2.)
     3 - See how it should update the stack details and the periodic time for that - In progress (User login? Once per day?) - Consider using epochs (client will ask for update once per day)
-        Note: Currently there is a Context and method for updating stake entrys already tested!
+        Note: Current idea is to be performed upon user login
 
     Note: Find a way for a user to be able to stake more than 1 NFT in the same pool - Currently done with multiple NFTs per stake entry. 
         Perhaps dig deeper into PDAs and seeds to find another solution (like a user having multiple PDAs? Is it worth it?)?

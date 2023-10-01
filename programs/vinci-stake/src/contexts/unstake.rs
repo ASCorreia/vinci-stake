@@ -4,7 +4,7 @@ use anchor_spl::token::{Token, TokenAccount};
 #[derive(Accounts)]
 pub struct UnstakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
-    #[account(mut, seeds = [b"VinciWorldStakeEntry_28", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
+    #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
     #[account(mut)]
     pub stake_pool: Box<Account<'info, StakePool>>,
@@ -45,7 +45,7 @@ impl<'info> UnstakeCtx<'info> {
         let from_token_account = &mut self.from_mint_token_account;
         let to_token_account = &mut self.to_mint_token_account;
 
-        let original_mint = &mut self.original_mint;
+        //let original_mint = &mut self.original_mint;
 
         let signer = &mut self.user;
 
@@ -63,8 +63,8 @@ impl<'info> UnstakeCtx<'info> {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
-        stake_entry.stake_mint_claimed.push(original_mint.key());
-        stake_entry.original_mint_claimed.retain(|mint| *mint != self.original_mint.key());
+        //stake_entry.stake_mint_claimed.push(original_mint.key());
+        //stake_entry.original_mint_claimed.retain(|mint| *mint != self.original_mint.key());
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != self.original_mint.key());
         /* ------------------------------------------------------------------------------------------------ */
@@ -102,12 +102,12 @@ impl<'info> UnstakeCtx<'info> {
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
         // Define the seeds
-        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciWorldStakeEntry_28", pda.key().as_ref()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciStakeEntry", pda.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
         msg!("Derived PDA Bump: {}", pda_bump);
 
         let seeds = &[
-            "VinciWorldStakeEntry_28".as_bytes(),
+            "VinciStakeEntry".as_bytes(),
             &pda.key().clone().to_bytes(),
             &[pda_bump]
         ];
@@ -129,8 +129,8 @@ impl<'info> UnstakeCtx<'info> {
             &[seeds], //&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
         )?;
 
-        stake_entry.stake_mint_claimed.push(original_mint.key());
-        stake_entry.original_mint_claimed.retain(|mint| *mint != self.original_mint.key());
+        //stake_entry.stake_mint_claimed.push(original_mint.key());
+        //stake_entry.original_mint_claimed.retain(|mint| *mint != self.original_mint.key());
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != self.original_mint.key());
         /* ------------------------------------------------------------------------------------------------ */

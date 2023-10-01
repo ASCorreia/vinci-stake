@@ -37,7 +37,7 @@ describe("vinci-stake", () => {
   /* Derive a PDA for a Vinci Stake Pool */
   const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
     [
-      anchor.utils.bytes.utf8.encode("VinciWorldStakePool_28"),
+      anchor.utils.bytes.utf8.encode("VinciStakePool"),
       provider.wallet.publicKey.toBuffer(),
     ],
     program.programId
@@ -47,7 +47,7 @@ describe("vinci-stake", () => {
   /* Derive a PDA for a Vinci Stake Entry */
   const [vinciWorldStakeEntry, bump] = anchor.web3.PublicKey.findProgramAddressSync(
     [
-      anchor.utils.bytes.utf8.encode("VinciWorldStakeEntry_28"),
+      anchor.utils.bytes.utf8.encode("VinciStakeEntry"),
       provider.wallet.publicKey.toBuffer(),
     ],
     program.programId
@@ -246,7 +246,7 @@ describe("vinci-stake", () => {
 
     console.log('\n\nThe token account info is:', tokenAccountData);
 
-    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({ //test variable is not necessary as the user will be the address used to compiute the pda
+    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({ //test variable is not necessary as the user will be the address used to compute the pda
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
@@ -295,18 +295,14 @@ describe("vinci-stake", () => {
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
-      fromMintTokenAccount: associatedTokenAccountFrom, //associatedTokenAccountFrom
+      fromMintTokenAccount: associatedTokenAccountFrom,
       toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
-      user: provider.wallet.publicKey, //key.wallet.publicKey,
+      user: provider.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
       test: provider.wallet.publicKey,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-    }).rpc(
-      {
-        skipPreflight: true,
-      }
-    );
+    }).rpc();
     console.log('\n\nNFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
   });
 
