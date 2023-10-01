@@ -22,7 +22,7 @@ Vinci Rewards - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vi
 - Program responsible for deploying rewards systems as needed
 
 
-Vinci Quiz - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-rewards](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-quiz).
+Vinci Quiz - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-quiz](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-quiz).
 - Program that has a tournament system impletmented in order to update player scores, update leaderboard and give rewards according to the leaderboard
 
 ## Architecture
