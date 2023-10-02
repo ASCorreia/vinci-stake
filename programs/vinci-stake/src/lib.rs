@@ -28,6 +28,8 @@ pub mod vinci_stake {
     pub fn initialize_stake_pool(ctx: Context<InitializeStakePool>) -> Result<()> {
         ctx.accounts.intialize()?;
 
+        ctx.accounts.stake_pool.bump = *ctx.bumps.get("stake_pool").unwrap();
+
         Ok(())
     }
 
@@ -66,30 +68,6 @@ pub mod vinci_stake {
     pub fn update_stake(ctx: Context<UpdateStakeCtx>) -> Result<()> { //Does this needs to use remaining accounts???
         //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
-
-        //Iterate through all the remaining accounts array
-        /*for account in ctx.remaining_accounts.iter() {
-            let mut stake_entry_data = account.try_borrow_mut_data()?;
-
-            //Deserialize the data into a stake entry
-            let mut stake_entry = StakeEntry::try_deserialize(&mut stake_entry_data.as_ref()).expect("Error deserializing stake entry data");
-
-            //Update the stake time 
-            for index in 0..stake_entry.original_mint_seconds_struct.len() {
-                let total_stake_seconds = stake_entry.original_mint_seconds_struct[index].time + (stake_entry.total_stake_seconds.saturating_add(
-                    (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
-                        .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
-                ));
-
-                stake_entry.original_mint_seconds_struct[index].time = total_stake_seconds;
-            }
-
-            //Set the last staked time
-            stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
-
-            //Serialize the data back
-            stake_entry.try_serialize(&mut stake_entry_data.as_mut())?;
-        }*/
 
         ctx.accounts.update_stake()?;
 

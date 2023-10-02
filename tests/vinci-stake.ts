@@ -38,7 +38,6 @@ describe("vinci-stake", () => {
   const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("VinciStakePool"),
-      provider.wallet.publicKey.toBuffer(),
     ],
     program.programId
   );
@@ -214,46 +213,20 @@ describe("vinci-stake", () => {
   });*/
 
   it("Stake Non Custodial", async () => {
-    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
     const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
     const masterEditionAcc = await getMasterEdition(mintAddress);
 
     const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
-    const associatedTokenAccountTo = await getAssociatedTokenAddress(mintAddress, provider.wallet.publicKey);
 
-    let receiverTokenAccount2: any
-    try {
-      receiverTokenAccount2 = await getAccount(
-        provider.connection,
-        associatedTokenAccountNonCust,
-        "confirmed",
-        TOKEN_PROGRAM_ID
-      )
-    } catch (e) {
-      // If the account does not exist, add the create account instruction to the transaction
-      //Fires a list of instructions
-      const mint_tx = new anchor.web3.Transaction().add(        
-        //Creates the ATA account that is associated with our mint on our anchor wallet (key)
-        createAssociatedTokenAccountInstruction(provider.wallet.publicKey, associatedTokenAccountNonCust, vinciWorldStakeEntry, mintAddress, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
-      );
-      console.log("\n\nAta address: ", associatedTokenAccountNonCust.toString());
-      const ataTx = await provider.sendAndConfirm(mint_tx);
-      console.log("Ata created: ", ataTx);
-    }
-    
-    const tokenAccountInfo = await provider.connection.getParsedAccountInfo(associatedTokenAccountNonCust);
-    const tokenAccountData = tokenAccountInfo.value.data;
-
-    console.log('\n\nThe token account info is:', tokenAccountData);
-
-    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({ //test variable is not necessary as the user will be the address used to compute the pda
+    const stakeNonCust = await program.methods.stakeNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
       fromMintTokenAccount: associatedTokenAccountFrom,
-      toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
-      user: provider.publicKey, //keypair.publicKey,
+      toMintTokenAccount: associatedTokenAccountFrom, //consider creating a new context for non costudial staking, as 'toMintTokenAccount' is not needed
+      user: provider.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
       masterEdition: masterEditionAcc,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
     }).rpc({skipPreflight: true});
@@ -289,18 +262,15 @@ describe("vinci-stake", () => {
 
     const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
 
-    const associatedTokenAccountNonCust = await getAssociatedTokenAddress(mintAddress, vinciWorldStakeEntry, true, TOKEN_PROGRAM_ID, ASSOCIATED_PROGRAM_ID); //vinciWorldNonCustodial
-
     const claimNonCust = await program.methods.claimNonCustodial().accounts({
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
       fromMintTokenAccount: associatedTokenAccountFrom,
-      toMintTokenAccount: associatedTokenAccountNonCust, //vinciWorldNonCustodial,
+      toMintTokenAccount: associatedTokenAccountFrom, //vinciWorldNonCustodial,
       user: provider.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
-      test: provider.wallet.publicKey,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
     }).rpc();
     console.log('\n\nNFT sucessfully unfrozen - Transaction ID: ', claimNonCust);

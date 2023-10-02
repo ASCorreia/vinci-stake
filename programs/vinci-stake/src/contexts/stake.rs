@@ -1,12 +1,13 @@
 use crate::*;
 use anchor_spl::token::{Token, TokenAccount};
+use anchor_lang::system_program;
 
 #[derive(Accounts)]
 pub struct StakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
     #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
-    #[account(mut)]
+    #[account(mut, seeds = [b"VinciStakePool"], bump = stake_pool.bump)]
     pub stake_pool: Box<Account<'info, StakePool>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
@@ -17,15 +18,16 @@ pub struct StakeCtx<'info>{
     #[account(mut)]
     pub master_edition: AccountInfo<'info>,
 
-    #[account(mut)]
+    #[account(mut, constraint = to_mint_token_account.mint == original_mint.key() @ CustomError::InvalidMint)]
     pub from_mint_token_account: Box<Account<'info, TokenAccount>>,
-    #[account(mut)]
+    #[account(mut, constraint = to_mint_token_account.mint == original_mint.key() @ CustomError::InvalidMint)]
     pub to_mint_token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(mut)]
     pub user: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     pub token_metadata_program: AccountInfo<'info>,
@@ -33,6 +35,9 @@ pub struct StakeCtx<'info>{
 
 impl<'info> StakeCtx<'info> {
     pub fn stake_custodial(&mut self) -> Result<()> {
+        if self.stake_entry.amount >= 10 {
+            self.realloc(StakeTime::INIT_SPACE, &self.user, &self.system_program)?;
+        }
 
         let original_mint = self.stake_entry.original_mint.key();
 
@@ -48,9 +53,6 @@ impl<'info> StakeCtx<'info> {
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_context, 1)?;
 
-        //self.stake_entry.original_owner = self.from_mint_token_account.key(); -> Probably not needed
-        //self.stake_entry.staking_owner = self.to_mint_token_account.key(); -> Probably not needed
-
         //Set the last staked time
         self.stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
         self.stake_entry.last_updated_at = Some(Clock::get().unwrap().unix_timestamp);
@@ -60,9 +62,6 @@ impl<'info> StakeCtx<'info> {
             (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
                 .saturating_sub(u128::try_from(self.stake_entry.last_staked_at).unwrap()),
         );
-
-        //Flag that the original mint has been claimed by the pool
-        //self.stake_entry.original_mint_claimed.push(original_mint);
 
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         let staking_time = StakeTime{time: self.stake_entry.total_stake_seconds, mint: original_mint};
@@ -116,7 +115,7 @@ impl<'info> StakeCtx<'info> {
         let seeds = &[
             "VinciStakeEntry".as_bytes(),
             &authority.key().clone().to_bytes(),
-            &[pda_bump]
+            &[stake_entry.bump]
         ];
 
         invoke_signed(
@@ -140,9 +139,6 @@ impl<'info> StakeCtx<'info> {
         Either use invoke_signed or try to use the program itself as delegation authority
         Try creating a PDA with a predefined seed (PDA_WORD for instance) and sign with that account (Create a dedicated PDA for this purpose))
         */
-        
-        //stake_entry.original_owner = user_token_accout.key(); -> Probably not needed
-        //stake_entry.staking_owner = stake_entry.key(); -> Probably not needed
 
         //Set the last staked time
         stake_entry.last_staked_at = Clock::get().unwrap().unix_timestamp;
@@ -153,9 +149,6 @@ impl<'info> StakeCtx<'info> {
                 .saturating_sub(u128::try_from(stake_entry.last_staked_at).unwrap()),
         );
 
-        //Flag that the original mint has been claimed by the pool
-        //stake_entry.original_mint_claimed.push(original_mint.key());
-
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         let staking_time = StakeTime{time: stake_entry.total_stake_seconds, mint: original_mint.key()};
         stake_entry.original_mint_seconds_struct.push(staking_time);
@@ -163,6 +156,31 @@ impl<'info> StakeCtx<'info> {
 
         stake_pool.total_staked += 1;
         stake_entry.amount += 1;
+
+        Ok(())
+    }
+
+    pub fn realloc(&self, space_to_add: usize, payer: &Signer<'info>, system_program: &Program<'info, System>) -> Result<()> {
+        msg!("Reallocating account size to add new mint to Stake Entry");
+        let account_info = self.stake_entry.to_account_info();
+        let new_account_size = account_info.data_len() + space_to_add;
+
+        // Determine additional rent required
+        let lamports_required = (Rent::get()?).minimum_balance(new_account_size);
+        let additional_rent_to_fund = lamports_required - account_info.lamports();
+
+        // Perform transfer of additional rent
+        let cpi_program = system_program.to_account_info();
+        let cpi_accounts = system_program::Transfer{
+            from: payer.to_account_info(), 
+            to: account_info.clone(),
+        };
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        system_program::transfer(cpi_context,additional_rent_to_fund)?;
+
+        // Reallocate the account
+        account_info.realloc(new_account_size, false)?;
+        msg!("Account Size Updated");
 
         Ok(())
     }

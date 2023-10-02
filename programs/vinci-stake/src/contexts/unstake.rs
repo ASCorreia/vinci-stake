@@ -6,7 +6,7 @@ pub struct UnstakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
     #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
-    #[account(mut)]
+    #[account(mut, seeds = [b"VinciStakePool"], bump = stake_pool.bump)]
     pub stake_pool: Box<Account<'info, StakePool>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
@@ -26,10 +26,6 @@ pub struct UnstakeCtx<'info>{
     pub user: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
-
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(mut)]
-    pub test: AccountInfo<'info>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     pub token_metadata_program: AccountInfo<'info>,
@@ -73,26 +69,19 @@ impl<'info> UnstakeCtx<'info> {
         stake_pool.total_staked -= 1;
         stake_entry.amount -= 1;
 
-
         Ok(())
     }
 
     pub fn claim_non_custodial(&mut self) -> Result<()> {
         //let authority = Pubkey::from_str("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C").unwrap();
-        let pda = &mut self.test;
-
         let stake_pool = &mut self.stake_pool;
         let stake_entry = &mut self.stake_entry;
 
         let original_mint = &mut self.original_mint;
 
         let user_token_accout = &mut self.from_mint_token_account;
-        let _program_id = &mut self.token_program;
 
         let token_edition = &mut self.master_edition;
-
-        let _delegate = &mut self.to_mint_token_account; //to be replaced (or to receive) by / with the program address
-        let _signer = &mut self.user; //To be deleted as we just need to check that he signed the transaction 
 
         let program_metadata_id = &mut self.token_metadata_program;
 
@@ -102,14 +91,14 @@ impl<'info> UnstakeCtx<'info> {
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
 
         // Define the seeds
-        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciStakeEntry", pda.key().as_ref()], &id());
+        let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciStakeEntry", self.user.key().as_ref()], &id());
         msg!("Derived PDA Address: {}", pda_address);
         msg!("Derived PDA Bump: {}", pda_bump);
 
         let seeds = &[
             "VinciStakeEntry".as_bytes(),
-            &pda.key().clone().to_bytes(),
-            &[pda_bump]
+            &self.user.key().clone().to_bytes(),
+            &[stake_entry.bump]
         ];
 
         invoke_signed(
@@ -126,11 +115,9 @@ impl<'info> UnstakeCtx<'info> {
                 token_edition.to_account_info(),
                 original_mint.to_account_info(),
             ],
-            &[seeds], //&[&[b"VinciWorldStakeEntry_28", pda.key().as_ref(), &[pda_bump]]],
+            &[seeds], //&[&[b"VinciStakeEntry", pda.key().as_ref(), &[pda_bump]]],
         )?;
 
-        //stake_entry.stake_mint_claimed.push(original_mint.key());
-        //stake_entry.original_mint_claimed.retain(|mint| *mint != self.original_mint.key());
         /* The following is an approach to store staking time if we decide to have multiple mints per entry */
         stake_entry.original_mint_seconds_struct.retain(|stake_mint_struct| stake_mint_struct.mint != self.original_mint.key());
         /* ------------------------------------------------------------------------------------------------ */
