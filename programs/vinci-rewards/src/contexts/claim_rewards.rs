@@ -6,7 +6,6 @@ use crate::*;
 pub struct StakeEntry {
     pub pool: Pubkey,
     pub amount: u64,
-    pub original_mint: Pubkey,
     pub last_staked_at: i64,
     pub total_stake_seconds: u128,
     pub original_mint_seconds_struct: Vec<StakeTime>, //To be discussed as an approach to store mint time (if only one stake entry is used per user)

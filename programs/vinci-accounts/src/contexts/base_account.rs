@@ -79,6 +79,4 @@ pub struct ItemStruct {
 }
 
 /* --------------- TBD -------------- */
-// Add Bump field to account and initialize it - Done
-// Check the bump as a constraint in other contexts - Done
 // Change 'owner' to 'authority'

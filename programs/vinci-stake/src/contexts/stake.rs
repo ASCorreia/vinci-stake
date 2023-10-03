@@ -1,5 +1,5 @@
 use crate::*;
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_spl::token::{Token, TokenAccount, Mint};
 use anchor_lang::system_program;
 
 #[derive(Accounts)]
@@ -13,6 +13,9 @@ pub struct StakeCtx<'info>{
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub original_mint: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
+    pub original_mint_metadata: AccountInfo<'info>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
@@ -39,7 +42,7 @@ impl<'info> StakeCtx<'info> {
             self.realloc(StakeTime::INIT_SPACE, &self.user, &self.system_program)?;
         }
 
-        let original_mint = self.stake_entry.original_mint.key();
+        let original_mint = self.original_mint.key();
 
         //TBD Do checks to the stake accounts (pool settings) and add more custom errors
 
@@ -181,6 +184,36 @@ impl<'info> StakeCtx<'info> {
         // Reallocate the account
         account_info.realloc(new_account_size, false)?;
         msg!("Account Size Updated");
+
+        Ok(())
+    }
+
+    pub fn check_mint(&self) -> Result<()> {
+        assert_derivation(
+            &mpl_token_metadata::id(),
+            &self.original_mint_metadata.to_account_info(),
+            &[
+                mpl_token_metadata::state::PREFIX.as_bytes(),
+                mpl_token_metadata::id().as_ref(),
+                self.original_mint.key().as_ref(),
+            ],
+        )?;
+
+        require!(self.original_mint_metadata.data_is_empty() == false, CustomError::MetadataAccountEmpty);
+
+        /* Borrow and deserialize the metada account from the original mint metadata */
+        let mint_metadata_data = self.original_mint_metadata.try_borrow_mut_data().expect("Error borrowing data");
+        require!(self.original_mint_metadata.to_account_info().owner.key() == mpl_token_metadata::id(), CustomError::InvalidMintOwner); //Checks that the owner is the Metadadata program
+        let original_mint_metadata = Metadata::deserialize(&mut mint_metadata_data.as_ref()).expect("Error deserializng metadata");
+        require!(original_mint_metadata.mint == self.original_mint.key(), CustomError::InvalidMint); //Checks that both the original mint and the one stored in the account are the same
+
+        //Get the creators from the metadata and see if the it contains the ones required by the stake pool
+        let creators = original_mint_metadata.data.creators.unwrap();
+        //let collection = original_mint_metadata.collection.unwrap();
+        let find_creators = creators.iter().find(|creator| self.stake_pool.requires_creators.contains(&creator.address) && !creator.verified); // (!)creator.verified
+
+        //Checks that the creators have been found
+        require!(find_creators.is_some() == true, CustomError::MissingCreators);
 
         Ok(())
     }

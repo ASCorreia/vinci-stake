@@ -156,9 +156,6 @@ describe("vinci-stake", () => {
       stakeEntry: vinciWorldStakeEntry,
       stakePoolAccount: vinciWorldStake,
 
-      originalMint: mintAddress,
-      originalMintMetadata: metadataAddress,
-
       systemProgram: anchor.web3.SystemProgram.programId,
     }).rpc({skipPreflight: true});
     console.log("Stake Entry address: ", vinciWorldStake.toBase58());
@@ -177,6 +174,7 @@ describe("vinci-stake", () => {
       stakePool: vinciWorldStake,
 
       originalMint: mintAddress,
+      originalMintMetadata: metadataAddress,
       fromMintTokenAccount: associatedTokenAccountFrom,
       toMintTokenAccount: associatedTokenAccountTo,
 
@@ -204,6 +202,7 @@ describe("vinci-stake", () => {
       toMintTokenAccount: associatedTokenAccountFrom,
 
       originalMint: mintAddress,
+      originalMintMetadata: metadataAddress,
 
       masterEdition: masterEditionAcc,
 
@@ -222,6 +221,7 @@ describe("vinci-stake", () => {
       stakeEntry: vinciWorldStakeEntry,
       stakePool: vinciWorldStake,
       originalMint: mintAddress,
+      originalMintMetadata: metadataAddress,
       fromMintTokenAccount: associatedTokenAccountFrom,
       toMintTokenAccount: associatedTokenAccountFrom, //consider creating a new context for non costudial staking, as 'toMintTokenAccount' is not needed
       user: provider.publicKey,
@@ -259,6 +259,7 @@ describe("vinci-stake", () => {
 
   it("Claim Non Custodial Stake", async () => {
     const masterEditionAcc = await getMasterEdition(mintAddress);
+    const metadataAddress = await getMetadata(mintAddress); //used for testing purposes only
 
     const associatedTokenAccountFrom = await getAssociatedTokenAddress(mintAddress, ownerAddress);
 
