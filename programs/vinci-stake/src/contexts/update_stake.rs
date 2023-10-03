@@ -9,9 +9,10 @@ pub struct UpdateStakeCtx<'info>{
 
 impl<'info> UpdateStakeCtx<'info> {
     pub fn update_stake(&mut self) -> Result<()> {
-        //Update the stake time 
+        //Update the stake time
+        let mut total_stake_seconds: u128;
         for index in 0..self.stake_entry.original_mint_seconds_struct.len() {
-            let total_stake_seconds = self.stake_entry.original_mint_seconds_struct[index].time + (self.stake_entry.total_stake_seconds.saturating_add(
+            total_stake_seconds = self.stake_entry.original_mint_seconds_struct[index].time + (self.stake_entry.total_stake_seconds.saturating_add(
                 (u128::try_from(Clock::get().unwrap().unix_timestamp).unwrap())
                     .saturating_sub(u128::try_from(self.stake_entry.last_staked_at).unwrap()),
             ));

@@ -255,6 +255,15 @@ describe("vinci-stake", () => {
 
     let fetchAccount = await accountsProgram.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey 
     console.log("Total Ammount Of Tokens", fetchAccount.totalAmount.toString());
+  });
+
+  it("Fetch Account and check staking details", async() => {
+    const account = await program.account.stakeEntry.fetch(vinciWorldStakeEntry);
+    let amount: bigint = account.amount as unknown as bigint;
+    console.log("\n\nAmount of staked NFTs: ", amount);
+    for (let i = 0; i < amount as any; i++) {
+      console.log("NFTs staked: ", account.originalMintSecondsStruct[i].mint.toBase58());
+    }
   })
 
   it("Claim Non Custodial Stake", async () => {
