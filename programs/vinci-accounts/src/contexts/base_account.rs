@@ -6,7 +6,7 @@ use crate::*;
 pub struct StartStuffOff<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(init, seeds = [b"VinciWorldAccount1", user.key().as_ref()], bump, payer = user, space = 3500)]
+    #[account(init, seeds = [b"VinciWorldAccount1", user.key().as_ref()], bump, payer = user, space = 8 + 8 + 32 + 1 + 1 + (4 + UserDetails::INIT_SPACE * 10))]
     pub base_account: Account<'info, BaseAccount>,
     pub system_program: Program<'info, System>
 }
@@ -69,12 +69,12 @@ pub struct BaseAccount {
     pub owner: Pubkey,
     pub bump: u8,
     pub level: u8,
-    pub spare_struct: Vec<ItemStruct>
+    pub spare_struct: Vec<UserDetails>
 }
 
-#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct ItemStruct {
-    pub ammount: String,
+#[derive(InitSpace, Debug, Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct UserDetails {
+    pub ammount: u32,
     pub user_address: Pubkey
 }
 

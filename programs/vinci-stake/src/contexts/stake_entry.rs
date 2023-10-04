@@ -18,7 +18,7 @@ impl<'info> InitializeStakeEntry<'info> {
     pub fn initialize(&mut self) -> Result<()> {
         
         self.stake_entry.pool = self.stake_pool_account.key();
-        self.stake_entry.amount = 0; //Probably not needed
+        self.stake_entry.amount = 0;
         self.stake_entry.original_mint_seconds_struct = Vec::new();
         self.stake_entry.cooldown_start_seconds = None;
         
@@ -26,7 +26,7 @@ impl<'info> InitializeStakeEntry<'info> {
     }
 }
 
-#[account]
+#[account] //consider adding InitSpace and giving fixed Vec Size
 pub struct StakeEntry {
     pub pool: Pubkey,
     pub amount: u64,

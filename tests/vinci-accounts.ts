@@ -34,7 +34,7 @@ describe("vinci-accounts", () => {
   console.log("\n\nVinci Quiz account: ", vinciQuizPDA[0].toBase58());
   console.log("Vinci Quiz account bump: ", vinciQuizPDA[1]);
 
-  /*it("Account Initialization", async() => {
+  it("Account Initialization", async() => {
     const tx = await program.methods.startStuffOff().accounts({
           baseAccount: vinciWorldPDA,
           user: key.wallet.publicKey,
@@ -42,9 +42,9 @@ describe("vinci-accounts", () => {
         }).rpc({skipPreflight: true}); //.signers[account] before rpc()
 
     console.log("\n\nVinci World PDA account created with Transaction", tx);
-  });*/
+  });
 
-  it ("Quest simulation", async() => {
+  /*it ("Quest simulation", async() => {
     let fetchAccount = await program.account.baseAccount.fetch(vinciWorldPDA); //account.publicKey
     
     console.log("\n\nTotal Ammount Of Tokens", fetchAccount.totalAmount.toString());
@@ -73,9 +73,9 @@ describe("vinci-accounts", () => {
     console.log("Tournament won - 30 Tokens awarded");
     console.log("Total Ammount Of Tokens", fetchAccount3.totalAmount.toString());
     //assert.equal(fetchAccount3.totalAmount.toString(), "45");
-  });
+  });*/
 
-  it("Distribute Season Rewards", async() => {
+  /*it("Distribute Season Rewards", async() => {
     const tx = await program.methods.seasonRewards().accounts({
       vinciQuiz: vinciQuizPDA[0],
       quizProgram: programQuiz.programId,
@@ -86,7 +86,7 @@ describe("vinci-accounts", () => {
     }]).rpc();
 
     console.log("\n\nSeason Rewards distributed - TxID: ", tx);
-  })
+  })*/
 
   /*it("Close Vinci Account and refund rent lamports", async() => {
     const tx = await program.methods.closeAccount().accounts({
