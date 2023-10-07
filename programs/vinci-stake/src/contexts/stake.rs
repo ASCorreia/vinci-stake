@@ -1,5 +1,5 @@
 use crate::*;
-use anchor_spl::token::{Token, TokenAccount, Mint};
+use anchor_spl::token::{Token, TokenAccount};
 use anchor_lang::system_program;
 
 #[derive(Accounts)]

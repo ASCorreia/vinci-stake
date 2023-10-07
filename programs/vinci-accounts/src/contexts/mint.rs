@@ -1,29 +1,129 @@
+use anchor_lang::solana_program::program::invoke_signed;
+use anchor_spl::token::Mint;
+
 use crate::*;
 
 #[derive(Accounts)]
 pub struct MintNFT<'info> {
-    #[account(mut)]
-    pub mint_authority: Signer<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub mint: UncheckedAccount<'info>,
-    //#[account(mut)]
-    pub token_program: Program<'info, Token>,
+    pub mint: Account<'info, Mint>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub metadata: UncheckedAccount<'info>,
+    pub token_account: AccountInfo<'info>,
+    #[account(mut, seeds = [b"authority"], bump)]
+    pub mint_authority: SystemAccount<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub token_account: UncheckedAccount<'info>,
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    pub token_metadata_program: UncheckedAccount<'info>,
+    pub metadata: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub payer: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
+    pub master_edition: AccountInfo<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     pub rent: AccountInfo<'info>,
+    pub token_program: Program<'info, Token>,
     /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(mut)]
-    pub master_edition: UncheckedAccount<'info>,
+    pub token_metadata_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> MintNFT<'info> {
+    /*
+        for details regarding the metadata account and master edition account, refer to metaplex docs at
+        https://docs.metaplex.com/programs/token-metadata/accounts
+     */
+    pub fn mint_nft(&mut self, uri: String, title: String) -> Result<()> {
+        msg!("Initializing Mint NFT");
+        let cpi_accounts = MintTo {
+            mint: self.mint.to_account_info(),
+            to: self.token_account.to_account_info(),
+            authority: self.mint_authority.to_account_info(),
+        };
+        msg!("CPI Accounts Assigned");
+        let cpi_program = self.token_program.to_account_info();
+        msg!("CPI Program Assigned");
+        let (_pda_address, pda_bump) = Pubkey::find_program_address(&[b"authority"], &id());
+        let seeds = &[
+            "authority".as_bytes(),
+            &[pda_bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        msg!("CPI Context Assigned");
+        token::mint_to(cpi_ctx, 1)?;
+        msg!("Token Minted !!!");
+        let account_info = vec![
+            self.metadata.to_account_info(),
+            self.mint.to_account_info(),
+            self.mint_authority.to_account_info(),
+            self.payer.to_account_info(),
+            self.token_metadata_program.to_account_info(),
+            self.token_program.to_account_info(),
+            self.system_program.to_account_info(),
+            self.rent.to_account_info(),
+        ];
+        msg!("Account Info Assigned");
+        let creator = vec![
+            mpl_token_metadata::state::Creator {
+                address: self.mint_authority.key(),
+                verified: true,
+                share: 100,
+            },
+        ];
+        msg!("Creator Assigned");
+        let symbol = std::string::ToString::to_string("VINCI");
+        invoke_signed(
+            &create_metadata_accounts_v3(
+                self.token_metadata_program.key(), //program_id
+                self.metadata.key(), //metadata_account
+                self.mint.key(), //mint
+                self.mint_authority.key(), //mint_authority
+                self.payer.key(), //payer
+                self.mint_authority.key(), //update_authority
+                title, //name
+                symbol, //symbol
+                uri, //uri
+                Some(creator), //creators
+                500, //seller_fee_basis_points
+                true, //update_authority_is_signer
+                false, //is_mutable
+                None, //collection
+                None, //uses
+                None, //collection_details
+            ),
+            account_info.as_slice(),
+            signer_seeds,
+        )?;
+        msg!("Metadata Account Created !!!");
+        let master_edition_infos = vec![
+            self.master_edition.to_account_info(),
+            self.mint.to_account_info(),
+            self.mint_authority.to_account_info(),
+            self.payer.to_account_info(),
+            self.metadata.to_account_info(),
+            self.token_metadata_program.to_account_info(),
+            self.token_program.to_account_info(),
+            self.system_program.to_account_info(),
+            self.rent.to_account_info(),
+        ];
+        msg!("Master Edition Account Infos Assigned");
+        invoke_signed(
+            &create_master_edition_v3(
+                self.token_metadata_program.key(), //program_id
+                self.master_edition.key(), //edition
+                self.mint.key(), //mint
+                self.mint_authority.key(), //update_authority
+                self.mint_authority.key(), //mint_authority
+                self.metadata.key(), //metadata (metadata_account)
+                self.payer.key(), //payer
+                Some(0), //max_supply
+            ),
+            master_edition_infos.as_slice(),
+            signer_seeds,
+        )?;
+        msg!("Master Edition Nft Minted !!!");
+        Ok(())
+    }
 }
