@@ -71,7 +71,8 @@ pub mod vinci_swap {
     }
 
     pub fn close(ctx: Context<Close>) -> Result<()> {
-        let _ctx = ctx;
+        ctx.accounts.close_pool()?;
+        
         Ok(())
     }
 }
