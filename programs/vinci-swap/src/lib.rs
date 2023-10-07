@@ -22,9 +22,6 @@ pub mod vinci_swap {
     }
 
     pub fn add_token(ctx: Context<AddToken>) -> Result<()> {
-        //let payer = &mut ctx.accounts.payer;
-        //let system_program = &mut ctx.accounts.system_program;
-
         ctx.accounts.check_token()?;
 
         Ok(())
@@ -72,7 +69,7 @@ pub mod vinci_swap {
 
     pub fn close(ctx: Context<Close>) -> Result<()> {
         ctx.accounts.close_pool()?;
-        
+
         Ok(())
     }
 }

@@ -153,6 +153,12 @@ pub mod vinci_accounts {
         Ok(())
     }
 
+    pub fn update_metadata(ctx: Context<UpdateMetadata>, uri: String) -> Result<()> {
+        ctx.accounts.update_metadata(uri)?;
+
+        Ok(())
+    }
+
     pub fn close_account(ctx: Context<Close>) -> Result<()> {
         let _ctx = ctx;
         

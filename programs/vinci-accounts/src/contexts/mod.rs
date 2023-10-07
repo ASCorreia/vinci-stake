@@ -5,6 +5,7 @@ pub mod close_account;
 pub mod season_rewards;
 pub mod operations;
 pub mod tokens;
+pub mod metadata_update;
 
 pub use base_account::*;
 pub use mint::*;
@@ -13,3 +14,4 @@ pub use close_account::*;
 pub use season_rewards::*;
 pub use operations::*;
 pub use tokens::*;
+pub use metadata_update::*;

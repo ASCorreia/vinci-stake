@@ -88,7 +88,7 @@ impl<'info> MintNFT<'info> {
                 Some(creator), //creators
                 500, //seller_fee_basis_points
                 true, //update_authority_is_signer
-                false, //is_mutable
+                true, //is_mutable
                 None, //collection
                 None, //uses
                 None, //collection_details
