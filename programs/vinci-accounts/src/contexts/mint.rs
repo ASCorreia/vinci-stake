@@ -73,7 +73,7 @@ impl<'info> MintNFT<'info> {
             },
         ];
         msg!("Creator Assigned");
-        let symbol = std::string::ToString::to_string("VINCI");
+        let symbol = std::string::ToString::to_string("NNV");
         invoke_signed(
             &create_metadata_accounts_v3(
                 self.token_metadata_program.key(), //program_id

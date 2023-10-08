@@ -210,7 +210,7 @@ impl<'info> StakeCtx<'info> {
         //Get the creators from the metadata and see if the it contains the ones required by the stake pool
         let creators = original_mint_metadata.data.creators.unwrap();
         //let collection = original_mint_metadata.collection.unwrap();
-        let find_creators = creators.iter().find(|creator| self.stake_pool.requires_creators.contains(&creator.address) && !creator.verified); // (!)creator.verified
+        let find_creators = creators.iter().find(|creator| self.stake_pool.requires_creators.contains(&creator.address) && creator.verified); // (!)creator.verified
 
         //Checks that the creators have been found
         require!(find_creators.is_some() == true, CustomError::MissingCreators);

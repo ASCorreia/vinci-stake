@@ -8,6 +8,7 @@ import assert from "assert";
 import { isConstructorDeclaration } from "typescript";
 import { VinciQuiz } from "../target/types/vinci_quiz";
 import { MINT_SIZE, TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, createInitializeMintInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { VinciStake } from "../target/types/vinci_stake";
 
 describe("vinci-accounts", () => {
   // Configure the client to use the local cluster.
@@ -16,8 +17,11 @@ describe("vinci-accounts", () => {
 
   const program = anchor.workspace.VinciAccounts as Program<VinciAccounts>;
   const programQuiz = anchor.workspace.VinciQuiz as Program<VinciQuiz>;
+  const programStake = anchor.workspace.VinciStake as Program<VinciStake>;
 
   const keypair = anchor.web3.Keypair.generate();
+
+  const NFTmintKey: anchor.web3.Keypair = anchor.web3.Keypair.generate();
 
   const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
@@ -118,11 +122,9 @@ describe("vinci-accounts", () => {
     console.log("\n\nSeason Rewards distributed - TxID: ", tx);
   })*/
 
-  it("Mint one NFT", async () => {
+  /*it("Mint one NFT", async () => {
     //Starts the Mint Operation
     console.log("Starting the NFT Mint Operation");
-
-    const NFTmintKey: anchor.web3.Keypair = anchor.web3.Keypair.generate();
     const lamports: number = await program.provider.connection.getMinimumBalanceForRentExemption(MINT_SIZE);
 
     //Get the ATA for a token on a public key (but might not exist yet)
@@ -159,7 +161,7 @@ describe("vinci-accounts", () => {
     console.log("Executing Smart Contract");
     const tx = await program.methods.mintNft(
       "https://arweave.net/Pe4erqz3MZoywHqntUGZoKIoH0k9QUykVDFVMjpJ08s",
-      "Vinci World EA").accounts(
+      "NN Vinci Model").accounts(
         {
           mintAuthority: pdaAuthority[0],
           mint: NFTmintKey.publicKey,
@@ -174,10 +176,98 @@ describe("vinci-accounts", () => {
         },
     ).rpc({skipPreflight: true});
     console.log("Your transaction signature", tx);       
-    console.log("NFT Mint Operation Finished!");
-    
-  })
+    console.log("NFT Mint Operation Finished!");  
+  });*/
 
+  /*it("Update NFT metadata", async() => {
+    const metadataAddress = await getMetadata(NFTmintKey.publicKey);
+
+    //Create a PDA to be mint authority
+    let pdaAuthority = findProgramAddressSync([anchor.utils.bytes.utf8.encode("authority")], program.programId);
+
+    const tx = await program.methods.updateMetadata(
+      "https://arweave.net/Pe4erqz3MZoywHqntUGZoKIoH0k9QUykVDFVMjpJ08s").accounts(
+        {
+          metadata: metadataAddress,
+          authority: pdaAuthority[0],
+          payer: key.publicKey,
+          tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        }
+      ).rpc();
+
+      console.log("Your transaction signature", tx);       
+      console.log("NFT Metadata Update Finished!");    
+  });*/
+
+  it("Create Vinci Account, Mint NFT and Close account", async () => {
+    const metadataAddress = await getMetadata(NFTmintKey.publicKey);
+    const masterEdition = await getMasterEdition(NFTmintKey.publicKey);
+    const lamports: number = await program.provider.connection.getMinimumBalanceForRentExemption(MINT_SIZE);
+    let receiver = key.publicKey;
+    let associatedTokenAccount = await getAssociatedTokenAddress(NFTmintKey.publicKey, receiver);
+    let pdaAuthority = findProgramAddressSync([anchor.utils.bytes.utf8.encode("authority")], program.programId);
+    
+    const tx = new anchor.web3.Transaction().add(
+      await program.methods.startStuffOff().accounts({
+        user: key.publicKey,
+        baseAccount: vinciWorldPDA,
+        systemProgram: SystemProgram.programId,
+      }).instruction(),
+
+      /*await programStake.methods.initializeStakeEntry().accounts({
+        user: key.wallet.publicKey,
+  
+        stakeEntry: vinciWorldStakeEntry,
+        stakePoolAccount: vinciWorldStake,
+  
+        systemProgram: anchor.web3.SystemProgram.programId,
+      }).instruction(),*/
+
+      anchor.web3.SystemProgram.createAccount({
+        fromPubkey: receiver,
+        newAccountPubkey: NFTmintKey.publicKey,
+        space: MINT_SIZE,
+        programId: TOKEN_PROGRAM_ID,
+        lamports,
+      }),
+    
+      createInitializeMintInstruction(NFTmintKey.publicKey, 0, pdaAuthority[0], pdaAuthority[0]),
+    
+      createAssociatedTokenAccountInstruction(receiver, associatedTokenAccount, receiver, NFTmintKey.publicKey),
+
+      await program.methods.mintNft(
+        "https://arweave.net/Pe4erqz3MZoywHqntUGZoKIoH0k9QUykVDFVMjpJ08s",
+        "NN Vinci Model").accounts(
+          {
+            mintAuthority: pdaAuthority[0],
+            mint: NFTmintKey.publicKey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            metadata: metadataAddress,
+            tokenAccount: associatedTokenAccount,
+            tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+            payer: receiver,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+            masterEdition: masterEdition,
+          },
+      ).instruction(),
+
+      /*await programStake.methods.closeStakeEntry().accounts({
+        stakeEntry: vinciWorldStakeEntry,
+        destination: provider.publicKey,
+      }).instruction(),*/
+
+      await program.methods.closeAccount().accounts({
+        vinciAccount: vinciWorldPDA,
+        destination: key.wallet.publicKey,
+      }).instruction(), 
+    );
+    //Sends and confirms the transaction
+    console.log("Sending transaction");
+    const res = await key.sendAndConfirm(tx, [NFTmintKey]);
+    console.log("Account Created! NFT Minted! Account Closed!: ", res);
+  })
+    
   /*it("Close Vinci Account and refund rent lamports", async() => {
     const tx = await program.methods.closeAccount().accounts({
         vinciAccount: vinciWorldPDA,

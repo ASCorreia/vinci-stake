@@ -17,7 +17,7 @@ impl<'info> InitializeStakePool<'info> {
         self.stake_pool.cooldown_seconds = None;
         self.stake_pool.identifier = 0xBEBACAFE;
         self.stake_pool.requires_authorization = false;
-        self.stake_pool.requires_creators.push(Pubkey::from_str("7qZkw6j9o16kqGugWTj4u8Lq9YHcPAX8dgwjjd9EYrhQ").unwrap());//6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ
+        self.stake_pool.requires_creators.push(Pubkey::from_str("G7zPrFKAEHkGPqKUhLSV4L95XECviMFgJbr3DT38BkWk").unwrap());
         self.stake_pool.max_stake_amount = None;
         self.stake_pool.total_staked = 0;
         

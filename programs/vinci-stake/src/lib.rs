@@ -42,12 +42,14 @@ pub mod vinci_stake {
     }
 
     pub fn stake(ctx: Context<StakeCtx>) -> Result<()> {
+        //ctx.accounts.check_mint()?;
         ctx.accounts.stake_custodial()?;     
 
         Ok(())
     }
 
     pub fn stake_non_custodial(ctx: Context<StakeCtx>) -> Result<()> {
+        //ctx.accounts.check_mint()?;
         ctx.accounts.stake_non_custodial()?;
 
         Ok(())
