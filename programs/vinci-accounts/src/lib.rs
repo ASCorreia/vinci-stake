@@ -1,11 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token;
 use anchor_spl::token::{Token, MintTo};
 use std::str::FromStr;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3};
 
-//declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 declare_id!("38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ");
 
 pub mod contexts;

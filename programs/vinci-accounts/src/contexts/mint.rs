@@ -33,8 +33,9 @@ impl<'info> MintNFT<'info> {
     /*
         for details regarding the metadata account and master edition account, refer to metaplex docs at
         https://docs.metaplex.com/programs/token-metadata/accounts
-     */
+    */
     pub fn mint_nft(&mut self, uri: String, title: String) -> Result<()> {
+        /* Create a CPI Call to mint one token */
         msg!("Initializing Mint NFT");
         let cpi_accounts = MintTo {
             mint: self.mint.to_account_info(),
@@ -54,6 +55,8 @@ impl<'info> MintNFT<'info> {
         msg!("CPI Context Assigned");
         token::mint_to(cpi_ctx, 1)?;
         msg!("Token Minted !!!");
+
+        /* Create an Account Info vector to hold the necessary accounts to create a Token Metadata Account */
         let account_info = vec![
             self.metadata.to_account_info(),
             self.mint.to_account_info(),
@@ -65,6 +68,7 @@ impl<'info> MintNFT<'info> {
             self.rent.to_account_info(),
         ];
         msg!("Account Info Assigned");
+        /* Create the NFT creators vector */
         let creator = vec![
             mpl_token_metadata::state::Creator {
                 address: self.mint_authority.key(),
@@ -73,6 +77,8 @@ impl<'info> MintNFT<'info> {
             },
         ];
         msg!("Creator Assigned");
+
+        /* Create a CPI call to create a Metadata Account associated with our minted token */
         let symbol = std::string::ToString::to_string("NNV");
         invoke_signed(
             &create_metadata_accounts_v3(
@@ -97,6 +103,8 @@ impl<'info> MintNFT<'info> {
             signer_seeds,
         )?;
         msg!("Metadata Account Created !!!");
+        
+        /* Create an Account Info vector to hold the necessary accounts to create a Master Edition Account */
         let master_edition_infos = vec![
             self.master_edition.to_account_info(),
             self.mint.to_account_info(),
@@ -109,6 +117,7 @@ impl<'info> MintNFT<'info> {
             self.rent.to_account_info(),
         ];
         msg!("Master Edition Account Infos Assigned");
+        /* Create a CPI call to create a Master Edition associated with our minted token and our metadata account */
         invoke_signed(
             &create_master_edition_v3(
                 self.token_metadata_program.key(), //program_id
