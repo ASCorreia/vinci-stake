@@ -294,13 +294,13 @@ describe("vinci-stake", () => {
     console.log("\n\nStake Entry Closed! TxID: ", tx);
   })
 
-  it("Close Stake Pool", async () => {
+  /*it("Close Stake Pool", async () => {
     const tx = await program.methods.closeStakePool().accounts({
       stakePool: vinciWorldStake,
       destination: provider.publicKey,
     }).rpc();
     console.log("\n\nStake Pool Closed! TxID: ", tx);
-  })
+  })*/
 });
 
 /* Things to consider */

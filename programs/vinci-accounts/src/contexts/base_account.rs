@@ -4,7 +4,7 @@ use crate::*;
 pub struct StartStuffOff<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(init, seeds = [b"VinciWorldAccount1", user.key().as_ref()], bump, payer = user, space = 8 + 8 + 32 + 1 + 1 + (4 + UserDetails::INIT_SPACE * 10))]
+    #[account(init, seeds = [b"VinciWorldAccount1", user.key().as_ref()], bump, payer = user, space = 8 + 8 + 8 + 32 + 1 + 1 + (4 + UserDetails::INIT_SPACE * 10))]
     pub base_account: Account<'info, BaseAccount>,
     pub system_program: Program<'info, System>
 }
@@ -16,6 +16,7 @@ impl<'info> StartStuffOff<'info> {
         let result = base_account.key();
         msg!(&result.to_string());
         base_account.total_amount = 0;
+        base_account.score = 0;
         base_account.owner = pubkey;
         base_account.level = 1;
 
@@ -26,6 +27,7 @@ impl<'info> StartStuffOff<'info> {
 #[account]
 pub struct BaseAccount {
     pub total_amount: u64,
+    pub score: u64,
     pub owner: Pubkey,
     pub bump: u8,
     pub level: u8,

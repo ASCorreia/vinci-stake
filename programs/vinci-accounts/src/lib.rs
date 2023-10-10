@@ -43,13 +43,19 @@ pub mod vinci_accounts {
         Ok(())
     }
 
-    pub fn add_ammount(ctx: Context<AddAmount>, ammount: u64) -> Result<()> {
+    pub fn add_ammount(ctx: Context<Operations>, ammount: u64) -> Result<()> {
         ctx.accounts.add_amount(ammount)?;
         
         Ok(())
     }
 
-    pub fn remove_ammount(ctx: Context<RemoveAmmount>, ammount: u64) -> Result<()> {
+    pub fn set_score(ctx: Context<Operations>, score: u64) -> Result<()> {
+        ctx.accounts.set_score(score)?;
+        
+        Ok(())
+    }
+
+    pub fn remove_ammount(ctx: Context<Operations>, ammount: u64) -> Result<()> {
         ctx.accounts.remove_amount(ammount)?;
         
         Ok(())
