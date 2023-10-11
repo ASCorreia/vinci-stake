@@ -6,3 +6,4 @@ target
 node_modules
 test-ledger
 wallet.ts
+wallet2.ts

@@ -6,3 +6,5 @@ node_modules
 dist
 build
 test-ledger
+wallet.ts
+wallet2.ts
