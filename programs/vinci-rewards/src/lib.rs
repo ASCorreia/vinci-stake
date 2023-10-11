@@ -19,7 +19,7 @@ pub mod vinci_rewards {
         msg!("Total staked time: {:?}", total_staked);
 
         let cpi_program = ctx.accounts.accounts_program.to_account_info();
-        let cpi_accounts = vinci_accounts::cpi::accounts::AddAmount {
+        let cpi_accounts = vinci_accounts::cpi::accounts::Operations {
             base_account: ctx.accounts.vinci_account.to_account_info(),
             owner: ctx.accounts.owner.to_account_info(),
         };
