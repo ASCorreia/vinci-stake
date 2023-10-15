@@ -10,16 +10,12 @@ Players will be able to train different characters using reinforcement learning 
 - Program that will be responsible for storing the Vinci User relavant data
 
 In this program, all the user relevant data (amount of Vinci Tokens, general score, etc) will be stored. This information can then be accessed by other Vinci Programs through Cross Program Invocations
-The Vinci Accounts programs also provides mint and burn functions for tokens and NFTs  
-
-
+The Vinci Accounts programs also provides mint and burn functions for tokens and NFTs   
 
 ### Vinci Stake 🥩 - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-stake](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-stake).
 - Program where the user will be able to stake their NFTs
 
-Vinci Stake program allows user to stake and unstake their NFTs in a custodial and non custodial way (The NFT will be frozen in the user wallet).  
-
-
+Vinci Stake program allows user to stake and unstake their NFTs in a custodial and non custodial way (The NFT will be frozen in the user wallet).   
 
 ### Vinci Swap 💱 - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-swap](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-swap).
 - Program where the user will be able to trade assets to improve his character
