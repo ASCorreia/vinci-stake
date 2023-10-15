@@ -9,8 +9,6 @@ Players will be able to train different characters using reinforcement learning 
 ### Vinci Accounts 👨‍💻 - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts).
 - Program that will be responsible for storing the Vinci User relavant data
 
-***************************************************************************************************************************************************************************************
-
 In this program, all the user relevant data (amount of Vinci Tokens, general score, etc) will be stored. This information can then be accessed by other Vinci Programs through Cross Program Invocations
 The Vinci Accounts programs also provides mint and burn functions for tokens and NFTs   
 
