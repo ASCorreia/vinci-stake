@@ -40,7 +40,6 @@ The same concept applies for unstaking rewards.
 
 ### Vinci Quiz 🏎️ - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-quiz](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-quiz).
 - Program that has a tournament system impletmented in order to update player scores, update leaderboard and give rewards according to the leaderboard
-- 
 
 ## Programs Interaction
 
