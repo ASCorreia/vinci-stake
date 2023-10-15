@@ -6,7 +6,7 @@ Players will be able to train different characters using reinforcement learning 
 
 ## Vinci World Programs - Current state and Architecture
 
-###Vinci Accounts 👨‍💻 - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts).
+### Vinci Accounts 👨‍💻 - [https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts](https://github.com/VinciWorld/vinci-stake/tree/main/programs/vinci-accounts).
 - Program that will be responsible for storing the Vinci User relavant data
 
 In this program, all the user relevant data (amount of Vinci Tokens, general score, etc) will be stored. This information can then be accessed by other Vinci Programs through Cross Program Invocations
