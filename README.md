@@ -44,9 +44,13 @@ The same concept applies for unstaking rewards.
 The Vinci World Programs consists of different programs that will enhance the user experience.
 
 Vinci Accounts will be the "main" program storing user information. The only direct calls to this programs are done to create an account and to set a general score.
+
 Vinci Stake will be responsible for the staking and unstaking of user NFTs. Any staking reward obtained will be routed to the rewards program that will, if needed, re-route that operation to the vinci accounts program (in case on Vinci Points rewards)
+
 Vinci Swap is where the user will experience some DeFi concepts by being able to trade tokens to fine tune their model. Currently, there no CPIs between the swap program and any other program (the user token amount will fetched directly from the associated token account)
+
 Vinci Quiz program is the tournament / seasons program. In here, competitions will be created as accounts an dusers will be able to join them. The program will reallocate the acocunt size by every entrance. The program is, as well, responsible for setting the score of each player and ordering the leaderboard. Calls to the rewards might be performed
+
 Vinci Reward will create CPIs to almost every program. It is responsible to calculate user rewards based on program / reward factor and will process it accordingly.
 
 ## Quick game walkthrough
