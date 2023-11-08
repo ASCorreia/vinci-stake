@@ -106,7 +106,7 @@ pub mod vinci_accounts {
             //Deserialize the data from the account and save it in an Account variable
             let mut account_to_write = BaseAccount::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
 
-            if ctx.accounts.user.is_signer == true  && ctx.accounts.user.to_account_info().key() == account_to_write.owner {
+            if ctx.accounts.user.is_signer == true  && ctx.accounts.user.to_account_info().key() == account_to_write.authority {
                 if awarded_accounts != win_accounts {
                     account_to_write.total_amount += ammount;
                     awarded_accounts += 1;

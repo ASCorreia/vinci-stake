@@ -17,7 +17,7 @@ impl<'info> StartStuffOff<'info> {
         msg!(&result.to_string());
         base_account.total_amount = 0;
         base_account.score = 0;
-        base_account.owner = pubkey;
+        base_account.authority = pubkey;
         base_account.level = 1;
 
         Ok(())
@@ -28,7 +28,7 @@ impl<'info> StartStuffOff<'info> {
 pub struct BaseAccount {
     pub total_amount: u64,
     pub score: u64,
-    pub owner: Pubkey,
+    pub authority: Pubkey,
     pub bump: u8,
     pub level: u8,
     pub spare_struct: Vec<UserDetails>
