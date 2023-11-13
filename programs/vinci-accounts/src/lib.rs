@@ -7,9 +7,11 @@ use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_
 declare_id!("38N2x62nEqdgRf67kaemiBNFijKMdnqb3XyCa4asw2fQ");
 
 pub mod contexts;
+pub mod state;
 pub mod error;
 
 pub use contexts::*;
+pub use state::*;
 pub use error::*;
 
 #[program]

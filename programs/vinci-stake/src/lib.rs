@@ -15,9 +15,11 @@ use vinci_rewards::program::VinciRewards;
 declare_id!("EjhezvQjSDBEQXVyJSY1EhmqsQFGEorS7XwwHmxcRNxV");
 
 pub mod contexts;
+pub mod state;
 pub mod error;
 
 pub use contexts::*;
+pub use state::*;
 pub use error::*;
 
 #[program]

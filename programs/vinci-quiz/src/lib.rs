@@ -4,8 +4,10 @@ use std::str::FromStr;
 declare_id!("5wvAnEqxro6JLFTkCTHtCnd4daWjPpEkDiK7HgrUEZcd");
 
 pub mod contexts;
+pub mod state;
 
 pub use contexts::*;
+pub use state::*;
 
 #[program]
 pub mod vinci_quiz {
