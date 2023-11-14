@@ -6,7 +6,7 @@ pub struct UnstakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
     #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
-    #[account(mut, seeds = [b"VinciStakePool"], bump = stake_pool.bump)]
+    #[account(mut, seeds = [b"VinciStakePool1"], bump = stake_pool.bump)]
     pub stake_pool: Box<Account<'info, StakePool>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
@@ -66,8 +66,8 @@ impl<'info> UnstakeCtx<'info> {
         /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
 
-        stake_pool.total_staked -= 1;
-        stake_entry.amount -= 1;
+        let _ = stake_pool.total_staked.saturating_sub(1); //-= 1;
+        let _ = stake_entry.amount.saturating_sub(1); //-= 1;
 
         Ok(())
     }
@@ -89,6 +89,9 @@ impl<'info> UnstakeCtx<'info> {
         //require!(stake_entry.original_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == Some(&original_mint.key()), CustomError::OriginalMintNotClaimed);
         //require!(stake_entry.stake_mint_claimed.iter().find(|mint| **mint == original_mint.key()) == None, CustomError::MintAlreadyClaimed);
         //require!(signer.key() == authority, CustomError::UnauthorizedSigner);
+
+        require!(stake_entry.original_mint_seconds_struct.iter().find(
+            |mint_struct|mint_struct.mint == original_mint.key()).is_some(), CustomError::MintAlreadyClaimed);
 
         // Define the seeds
         let (pda_address, pda_bump) = Pubkey::find_program_address(&[b"VinciStakeEntry", self.user.key().as_ref()], &id());
@@ -123,8 +126,8 @@ impl<'info> UnstakeCtx<'info> {
         /* ------------------------------------------------------------------------------------------------ */
         stake_entry.total_stake_seconds = 0;
 
-        stake_pool.total_staked -= 1;
-        stake_entry.amount -= 1;
+        let _ = stake_pool.total_staked.saturating_sub(1); //-= 1;
+        let _ = stake_entry.amount.saturating_sub(1); //-= 1;
 
         Ok(())
     }

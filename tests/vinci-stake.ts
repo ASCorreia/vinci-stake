@@ -37,7 +37,7 @@ describe("vinci-stake", () => {
   /* Derive a PDA for a Vinci Stake Pool */
   const [vinciWorldStake, _] = anchor.web3.PublicKey.findProgramAddressSync(
     [
-      anchor.utils.bytes.utf8.encode("VinciStakePool"),
+      anchor.utils.bytes.utf8.encode("VinciStakePool1"),
     ],
     program.programId
   );
@@ -99,7 +99,7 @@ describe("vinci-stake", () => {
       stakePool: vinciWorldStake,
       user: provider.wallet.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId,
-    }).rpc();
+    }).rpc({skipPreflight: true});
     console.log("Stake Pool address: ", vinciWorldStake.toBase58());
     console.log("Stake Pool Initialized");
     console.log("Your transaction signature", stakePoolTx);
@@ -282,7 +282,7 @@ describe("vinci-stake", () => {
       tokenProgram: TOKEN_PROGRAM_ID,
       masterEdition: masterEditionAcc,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-    }).rpc();
+    }).rpc({skipPreflight: true});
     console.log('\n\nNFT sucessfully unfrozen - Transaction ID: ', claimNonCust);
   });
 
@@ -294,13 +294,13 @@ describe("vinci-stake", () => {
     console.log("\n\nStake Entry Closed! TxID: ", tx);
   })
 
-  /*it("Close Stake Pool", async () => {
+  it("Close Stake Pool", async () => {
     const tx = await program.methods.closeStakePool().accounts({
       stakePool: vinciWorldStake,
       destination: provider.publicKey,
     }).rpc();
     console.log("\n\nStake Pool Closed! TxID: ", tx);
-  })*/
+  })
 });
 
 /* Things to consider */

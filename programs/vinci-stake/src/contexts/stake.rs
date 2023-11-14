@@ -7,7 +7,7 @@ pub struct StakeCtx<'info>{
     //TBD Validate StakeEntry and StakePool seed through anchor macros
     #[account(mut, seeds = [b"VinciStakeEntry", user.key().as_ref()], bump = stake_entry.bump, constraint = stake_entry.pool == stake_pool.key() @ CustomError::InvalidStakePool)]
     pub stake_entry: Box<Account<'info, StakeEntry>>,
-    #[account(mut, seeds = [b"VinciStakePool"], bump = stake_pool.bump)]
+    #[account(mut, seeds = [b"VinciStakePool1"], bump = stake_pool.bump)]
     pub stake_pool: Box<Account<'info, StakePool>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
